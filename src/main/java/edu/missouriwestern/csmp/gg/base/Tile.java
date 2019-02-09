@@ -1,5 +1,7 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import edu.missouriwestern.csmp.gg.base.event.MovedEvent;
+import edu.missouriwestern.csmp.gg.base.factory.TileFactory;
 import net.sourcedestination.funcles.tuple.*;
 
 import java.awt.Color;
@@ -15,10 +17,6 @@ import java.util.HashSet;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
-
-import apg.game.event.MovedEvent;
-import apg.game.factory.TileFactory;
-import apg.messages.NoFactoryFoundException;
 
 
 /** Represents spaces on the Board */
@@ -39,7 +37,7 @@ public abstract class Tile implements Container {
 	 * @param type character representation of the Tile for some game
 	 * @param factory associated TileFactory
 	 */
-	public static void registerTileFactory(T2<Class<?extends Game>, Character> type, TileFactory factory) {
+	public static void registerTileFactory(Tuple2<Class<?extends Game>, Character> type, TileFactory factory) {
 		tileFactories.put(type, factory);
 	}
 	/**
@@ -51,10 +49,10 @@ public abstract class Tile implements Container {
 	 * @return created Tile
 	 * @throhttp://localhost:8080/APG/robots-logo.pngws NoFactoryFoundException no matching {@link TileFactory} was found
 	 */
-	public static Tile readTile(Class<?extends Game> gameClass,char c, Board board, Location location) throws NoFactoryFoundException {
-		if(tileFactories.containsKey(new T2<Class<?extends Game>, Character>(gameClass,c))) 
-			return tileFactories.get(new T2<Class<?extends Game>, Character>(gameClass,c)).buildTile(board, location);
-		throw new NoFactoryFoundException("Tile Factory of for '" + c + "'not found!");
+	public static Tile readTile(Class<?extends Game> gameClass,char c, Board board, Location location) {
+		if(tileFactories.containsKey(new Tuple2<>(gameClass,c)))
+			return tileFactories.get(new Tuple2<>(gameClass,c)).buildTile(board, location);
+		throw new RuntimeException("Tile Factory of for '" + c + "'not found!");
 	}
 	/**
 	 * Associates an image {@link URL} with a given tile representation
@@ -62,27 +60,27 @@ public abstract class Tile implements Container {
 	 * @param imageURL image URL
 	 */
 	public static void registerTileImage(Class<?extends Game> gameClass, char symbol, URL imageURL) {
-		tileImageURLs.put(new T2<Class<?extends Game>, Character>(gameClass,symbol), imageURL);
+		tileImageURLs.put(new Tuple2<>(gameClass,symbol), imageURL);
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(imageURL);
 		} catch (IOException e) {}
-		tileImages.put(new T2<Class<?extends Game>, Character>(gameClass,symbol), img);
+		tileImages.put(new Tuple2<>(gameClass,symbol), img);
 	}
 	/**
 	 * Returns tile {@link BufferedImage}
 	 * @return tile image
 	 */
 	public BufferedImage getImage() {
-		if(tileImages.containsKey(new T2<Class<?extends Game>, Character>(getBoard().getGame().getClass(), idChar))) 
-			return tileImages.get(new T2<Class<?extends Game>, Character>(getBoard().getGame().getClass(),idChar));
+		if(tileImages.containsKey(new Tuple2<>(getBoard().getGame().getClass(), idChar)))
+			return tileImages.get(new Tuple2<>(getBoard().getGame().getClass(),idChar));
 		return null;
 	}
 	/**
 	 * Returns a map of character representation to game classes with image {@link URL}s
 	 * @return character/game class to image URL map
 	 */
-	public static HashMap<T2<Class<?extends Game>, Character>, URL>  getImageURLs() {
+	public static HashMap<Tuple2<Class<?extends Game>, Character>, URL>  getImageURLs() {
 		return tileImageURLs;
 	}
 	/**
@@ -92,8 +90,8 @@ public abstract class Tile implements Container {
 	 */
 	public static Collection<URL> getImageURLs(Class<?extends Game> gameClass) {
 		ArrayList<URL> urls = new ArrayList<URL>();
-		for(Entry<T2<Class<? extends Game>, Character>, URL> e : tileImageURLs.entrySet()) {
-			if(e.getKey().a1().equals(gameClass))
+		for(Entry<Tuple2<Class<? extends Game>, Character>, URL> e : tileImageURLs.entrySet()) {
+			if(e.getKey()._1.equals(gameClass))
 				urls.add(e.getValue());
 		}
 		return urls;

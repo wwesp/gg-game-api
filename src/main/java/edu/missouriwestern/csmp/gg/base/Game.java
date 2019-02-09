@@ -2,13 +2,13 @@ package edu.missouriwestern.csmp.gg.base;
 
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.*;
 
+import edu.missouriwestern.csmp.gg.base.event.*;
+import edu.missouriwestern.csmp.gg.base.factory.GameFactory;
 import net.sourcedestination.funcles.tuple.*;
 import java.net.URL;
 
@@ -16,21 +16,14 @@ import java.net.URL;
 public abstract class Game implements Runnable {
 
 
-	//Server Parameters
-	// game type -> (set of {param name, param type}...)
-	private static HashMap<String, HashSet<T2<String,ConfigurationType>>> defaultParams = 
-			new HashMap<>();
 	
 	@Deprecated private int START_PORT = 10200;
 	@Deprecated private int END_PORT = 18200;
 	protected HashSet<String> extensionClasses = new HashSet<String>();
-	private Configuration config = new Configuration();
     @Deprecated private HashMap<String, URL> defaultEntityImages = new HashMap<String, URL>();
-	private Server server;
-        private ArrayList<GameEventListener> defferedListenerRegistrations = new ArrayList<GameEventListener>();
-
-        boolean currentlySendingEvent;
-        ArrayList<GameEvent> eventQueue = new ArrayList<GameEvent>();
+    private ArrayList<GameEventListener> defferedListenerRegistrations = new ArrayList<>();
+    boolean currentlySendingEvent;
+    ArrayList<GameEvent> eventQueue = new ArrayList<>();
 
 	private Board board;
 	private int nextEntityID = 0;
@@ -44,8 +37,8 @@ public abstract class Game implements Runnable {
 	private HashSet<GameEventListener> listeners = new HashSet<GameEventListener>();
 	private static HashSet<GameEventListener> globalListeners = new HashSet<GameEventListener>();
 
-	private LinkedList<Tuple2<Actionable, Double>> actionQueue = new LinkedList<Tuple2<Actionable, Double>>();
-	private HashMap<Integer, Entity> registeredEntities = new HashMap<Integer, Entity>();
+	private LinkedList<Tuple2<Actionable, Double>> actionQueue = new LinkedList<>();
+	private HashMap<Integer, Entity> registeredEntities = new HashMap<>();
 	private double gameTime;
 	protected HashSet<Player> allPlayers = new HashSet<Player>();
 
@@ -90,69 +83,8 @@ public abstract class Game implements Runnable {
 		}
 		return null;
 	}
-	
-	/** adds a configuration parameter to every instance of the specified game type */
-	public static void addConfigurationParameter(String gt, String name, ConfigurationType type) {
-		if(!defaultParams.containsKey(gt)) 
-			defaultParams.put(gt, new HashSet<T2<String,ConfigurationType>>());
-		defaultParams.get(gt).add(Tuple.makeTuple(name, type));
-	}
 
-	public static HashSet<String> getParameterNames(String gt) {
-		HashSet<String> names = new HashSet<String>();
-		if(defaultParams.containsKey(gt)) 
-			for(T2<String, ConfigurationType> t : defaultParams.get(gt)) 
-				names.add(t.a1());
-		return names;
-	}
 
-	public static ConfigurationType getParameterType(String gt, String name) {
-		if(defaultParams.containsKey(gt)) 
-			for(T2<String, ConfigurationType> t : defaultParams.get(gt))
-				if(t.a1().equals(name)) 
-					return t.a2();
-		throw new IllegalArgumentException("no paramter with name '"+name+" for class: " + gt);
-	}
-	
-	
-
-	public Configuration getConfig(){
-		return config;
-	}
-	
-	/**
-	 * Returns the game {@link Server}
-	 * @return server
-	 */
-	public Server getServer() { return server; }
-	/**
-	 * Returns an unused port
-	 * @return new unused port
-	 */
-	//TODO: Separate this from game class.
-	@Deprecated private int getNewPort() {
-		int p=0;
-		do {
-			p = (int)(Math.random()*(END_PORT-START_PORT) + START_PORT);
-		} while(Server.getPortsInUse().contains(p));
-		return p;
-	}
-	/**
-	 * Launches the game {@link Server} on a new port
-	 * @return whether Server and Game were successfully started
-	 */
-	//TODO: Seperate this from game class.
-	@Deprecated public boolean launchServer() { 
-		//if(!validate())
-		//	return false;
-		try { 
-			server = new Server(this, getNewPort()); 
-			Thread t = new Thread(server);
-			t.start();
-		}
-		catch(Exception e) { System.out.println("Error starting server"); e.printStackTrace(); return false;}
-		return true;
-	}
 	/**
 	 * Loads an extension class
 	 * @param className package path to the Class
@@ -190,7 +122,7 @@ public abstract class Game implements Runnable {
 		if(playerIt.hasNext()) {
 			Player p = playerIt.next();
 			if(p.equals(player)) {
-				p.getConnection().disconnect();
+				//p.getConnection().disconnect();
 				
 				allPlayers.remove(player);
 				return;
@@ -219,6 +151,7 @@ public abstract class Game implements Runnable {
 	 * @param cfgPath path to config file within the jar
 	 */
 	protected Game(String cfgPath) {
+		/*
 		if(defaultParams.containsKey(getClass().getSimpleName()))
 			for(T2<String,ConfigurationType> t : defaultParams.get(getClass().getSimpleName()))
 				config.addParameter(t.a1(), t.a2());
@@ -244,7 +177,8 @@ public abstract class Game implements Runnable {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
+		*/
 	}
 
 	/**
@@ -279,12 +213,12 @@ public abstract class Game implements Runnable {
 					try { wait(); } catch (InterruptedException e) {} 
 				}
 			} else if(running) {
-				T2<Actionable,Double> args = actionQueue.poll();
+				Tuple2<Actionable,Double> args = actionQueue.poll();
 				beforeActionCall(args.a1());
-				gameTime = args.a2();
-				args.a1().takeAction();
+				gameTime = args._2;
+				args._1.takeAction();
 				sendEvent(new TimerEvent(this, null, gameTime));//TODO: Should this go to all players?
-				afterActionCall(args.a1());
+				afterActionCall(args._1());
 			}
 		}
 	}
@@ -467,25 +401,7 @@ public abstract class Game implements Runnable {
 	@Deprecated public void sendEvent(GameEvent evt, GameEventListener listener) {
 		listener.processGameEvent(evt);
 	}
-	/**
-	 * Stops the game, disconnects {@link PlayerConnection}s, and stops {@link Server}
-	 */
-	public void stopGame() {
-		running = false;
-		isOver = true;
-		HashSet<Player> pls = null;
-		sendEvent(new GameEndEvent(this, null)); //sends to all players.
-		synchronized(this) {pls = (HashSet<Player>) allPlayers.clone();}
-		for(Player p : pls) {
-			synchronized(p) { p.getConnection().notifyAll(); }
-			p.getConnection().disconnect();
-		}
-		if(server != null)
-			server.stopServer();
 
-		synchronized(this) { notifyAll(); }
-	}
-	
 	/**
 	 * Registers a command from given {@link PlayerConnection}
 	 * PlayerConnections can be gotten from players by calling getConnection().

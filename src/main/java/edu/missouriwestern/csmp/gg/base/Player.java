@@ -10,23 +10,14 @@ public class Player implements Container{
 	private int score = 0; //Score starts at zero.
 	private String name;
 	private URL imgURL;
-	private PlayerConnection connection;
 	private Colour color;
 	
-	public Player(int id, String name, Colour color, URL imgURL, PlayerConnection connection){
+	public Player(int id, String name, Colour color, URL imgURL){
 		this.id = id;
 		this.name = name;
 		this.color = color;
 		this.imgURL = imgURL;
-		this.connection = connection;
 	}
-	
-	/**
-	 * returns the {@link PlayerConnection} held by player
-	 * @return PlayerConnection 
-	 */
-	public PlayerConnection getConnection(){return connection;}
-	 
 	/**
 	 * {@inheritDoc}
 	 */

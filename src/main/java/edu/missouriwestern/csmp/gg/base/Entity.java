@@ -1,8 +1,13 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import edu.missouriwestern.csmp.gg.base.event.EntityLeftEvent;
+import edu.missouriwestern.csmp.gg.base.factory.EntityFactory;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 
 /** a class representing tile-occupying entities in the game */
@@ -18,7 +23,7 @@ public abstract class Entity {
 	/**
 	 * Map of Entity names to their factories
 	 */
-	private static final HashMap<String, EntityFactory> entityFactories = new HashMap<String, EntityFactory>();
+	private static final Map<String, EntityFactory> entityFactories = new HashMap<>();
 	/**
 	 * Registers {@link EntityFactory} by associating it with an Entity type
 	 * @param type name/type of the Entity
@@ -36,10 +41,10 @@ public abstract class Entity {
 	 * @return created Entity
 	 * @throws NoFactoryFoundException if no associated {@link EntityFactory} was found
 	 */
-	public static Entity createEntity(String type, Game game, Player player) throws NoFactoryFoundException{
+	public static Entity createEntity(String type, Game game, Player player)  {
 		if(entityFactories.containsKey(type))
 			return entityFactories.get(type).buildEntity(game, player);
-		throw new NoFactoryFoundException("Entity Factory of type '" + type + "'not found!");
+		throw new RuntimeException("Entity Factory of type '" + type + "'not found!");
 	}
 	
 	/**
