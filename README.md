@@ -1,1 +1,1 @@
-MWSU game club base application
+MWSU game club base game application library
