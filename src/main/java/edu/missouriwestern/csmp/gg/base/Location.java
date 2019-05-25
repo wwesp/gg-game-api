@@ -1,6 +1,6 @@
 package edu.missouriwestern.csmp.gg.base;
 
-/** This class represents a location as row and column values on the board */
+/** This class represents a location as row and column values on a board */
 public class Location {
 	private int column;
 	private int row;

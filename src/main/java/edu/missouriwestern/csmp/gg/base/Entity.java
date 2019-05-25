@@ -1,81 +1,32 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import edu.missouriwestern.csmp.gg.base.event.EntityLeftEvent;
-import edu.missouriwestern.csmp.gg.base.factory.EntityFactory;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import javax.imageio.ImageIO;
-
 /** a class representing tile-occupying entities in the game */
 public abstract class Entity {
 	private int id;
 	private Game game;
 	private boolean dead = false;
-	private BufferedImage img;
-	private URL imgURL;
 	private Direction heading;
 	private Player owner;
 
 	/**
-	 * Map of Entity names to their factories
-	 */
-	private static final Map<String, EntityFactory> entityFactories = new HashMap<>();
-	/**
-	 * Registers {@link EntityFactory} by associating it with an Entity type
-	 * @param type name/type of the Entity
-	 * @param factory associated EntityFactory
-	 */
-	public static void registerEntityFactory(String type, EntityFactory factory) {
-		entityFactories.put(type, factory);
-	}
-	
-	/**
-	 * Creates an entity from a given type, {@link Game}, and {@link PlayerConnection}
-	 * @param type Entity type
+	 * Constructs Entity from a {@link Game} and player id for owner
 	 * @param game associated Game
-     * @param game associated Player
-	 * @return created Entity
-	 * @throws NoFactoryFoundException if no associated {@link EntityFactory} was found
-	 */
-	public static Entity createEntity(String type, Game game, Player player)  {
-		if(entityFactories.containsKey(type))
-			return entityFactories.get(type).buildEntity(game, player);
-		throw new RuntimeException("Entity Factory of type '" + type + "'not found!");
-	}
-	
-	/**
-	 * Constructs Entity from a {@link Game} and {@link URL} of image and player id for owner
-	 * @param game associated Game
-	 * @param imgURL image URL
 	 * @param owner id of owner
 	 * @
 	 */
-	protected Entity(Game game, URL imgURL, Player owner) { 
+	protected Entity(Game game, Player owner) {
 		this.game = game;
-		this.imgURL = imgURL;
 		this.owner = owner;
-		try {
-			img = ImageIO.read(imgURL);
-		} catch (IOException e) {System.out.println("bad URL");}
 		this.id = game.registerEntity(this);
 	}
 	
 	/**
-	 * Constructs Entity from a {@link Game} and {@link URL} of image
+	 * Constructs Entity from a {@link Game}
 	 * @param game associated Game
-	 * @param imgURL image URL
 	 */
-	protected Entity(Game game, URL imgURL) { 
+	protected Entity(Game game) {
 		this.game = game;
-		this.imgURL = imgURL;
 		owner = null;
-		try {
-			img = ImageIO.read(imgURL);
-		} catch (IOException e) {}
 		this.id = game.registerEntity(this);
 	}
 	
@@ -98,22 +49,20 @@ public abstract class Entity {
 	 * @return facing Direction
 	 */
 	public Direction getHeading() { return heading; }
+	/**
+	 * Returns the facing {@link Direction} of the Entity
+	 * @return facing Direction
+	 */
+	public boolean setHeading() {
+		this.heading = heading;
+		return true;
+	}
 
 	/** 
 	 * returns the unique identifier for this robot
      * @return the unique identifier for this robot
 	 */
 	public int getID() { return id; }
-	/**
-	 * Returns {@link BufferedImage} associated with this Entity
-	 * @return associated image
-	 */
-	public BufferedImage getImage() { return img; }
-	/**
-	 * Returns image {@link URL}
-	 * @return image URL
-	 */
-	public URL getImageURL() { return imgURL; }
 	/**
 	 * Returns {@link Game} associated with this Entity
 	 * @return associated Game
@@ -126,17 +75,11 @@ public abstract class Entity {
 	public boolean isAlive() { return !dead; }
 	/**
 	 * Kills the Entity and removes it from the Game
-	 * @see Game#removeEntity(Entity)
-	 * @see EntityLeftEvent
-	 * 
-	 * TODO: Consider eliminating the "dead" field
-	 * TODO: rename?
 	 */
 	public void die() {
         if(dead) return;
 		dead = true;
 		game.removeEntity(this);
-		game.sendEvent(new EntityLeftEvent(game, null, this)); //sends to all players.
 	}
 	
 	/**
