@@ -1,37 +1,41 @@
 package edu.missouriwestern.csmp.gg.base;
-
-import java.util.HashSet;
+import java.util.stream.Stream;
 
 /**
  * Interface for a container that can hold entities.
- * @author mhays14
- *
  */
 public interface Container {
 	
 	/**
 	 * Adds Entity to container.
-	 * @param e: Entity - Entity to add.
-	 * @return True if entity is added. False otherwise.
+	 * @param e Entity to add.
 	 */
-	public boolean addEntity(Entity e);
+	public void addEntity(Entity e);
+
 	/**
 	 * Gets Entity e from container. 
-	 * @param id: int - id of entity.
-	 * @return e: Entity
+	 * @param id  id of entity.
+	 * @return e Entity with associated id
 	 */
 	public Entity getEntity(int id);
+
 	/**
 	 * Removes entity from container.
-	 * @param e: Entity - Entity to remove.
-	 * @return True if removed. False otherwise.
+	 * By default simply removes entity from all contained container entities, recursively.
+	 * Should be overridden and called from implementing class.
+	 * @param ent Entity to remove.
 	 */
-	public boolean removeEntity(Entity e);
+	public default void removeEntity(Entity ent) {
+		getEntities()
+				.filter(e -> e instanceof Container)
+				.forEach(e -> ((Container)e).removeEntity(e));
+	}
+
 	/**
 	 * returns all entities in container.
 	 * @return HashSet of all entities. 
 	 */
-	public HashSet<Entity> getEntities();
+	public Stream<Entity> getEntities();
 	
 
 }

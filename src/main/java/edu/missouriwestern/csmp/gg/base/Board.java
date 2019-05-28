@@ -1,46 +1,40 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashSet;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /** represents the playing board */
 public class Board {
 
-	private Map<Location, Tile> tiles = new HashMap<Location, Tile>();
+	private Map<Location, Tile> tiles = new HashMap<>();
 	private Game game;
 
 	/**
 	 * Board Constructor
 	 * @param tiles {@link Tile} map with {@link Location}n as the key
 	 */
-	public Board(HashMap<Location, Tile> tiles) {
+	public Board(HashMap<Location, Tile> tiles, Game game) {
+		this.game = game;
 		this.tiles = tiles;
 	}
+
 	/**
 	 * Returns the {@link Game} associated with this board
 	 * @return associated Game
 	 */
 	public Game getGame() { return game; }
-	/**
-	 * Sets the {@link Game} associated with this Board
-	 * @param game the game to be set
-	 */
-	void setGame(Game game) {
-		this.game = game;
-	}
 	
 	/**
 	 * Checks if Location exists on board.
 	 * @param loc
 	 * @return
 	 */
-	//TODO: Test this method
 	private boolean locationExists(Location loc){
 		return tiles.containsKey(loc);
 	}
+
 	/**
 	 * Find an adjacent {@link Tile} given a Tile and {@link Direction}
 	 * @param tile original Tile
@@ -53,6 +47,7 @@ public class Board {
 			return getTile(adjLoc);
 		return null;
 	}
+
 	/**
 	 * Find adjacent Tile given a Location and Direction 
 	 * @param loc location of original tile
@@ -65,6 +60,7 @@ public class Board {
 			return getTile(adjLoc);
 		return null;
 	}
+
 	/**
 	 * Returns the {@link Direction} between two {@link Tile}s
 	 * <p>
@@ -93,10 +89,11 @@ public class Board {
 	public Map<Location, Tile> getTiles() { return tiles; }
 	
 	/**
-	 * Returns Collection of {@link Tile}s associated with this Board
-	 * @return collection of tiles
+	 * Returns stream of {@link Tile}s associated with this Board
+	 * @return stream of all tiles associated with the board
 	 */
-	public Collection<Tile> getTileCollection() { return tiles.values(); }
+	public Stream<Tile> getTileStream() { return tiles.values().stream(); }
+
 	/**
 	 * Returns a {@link Tile} at the given {@link Location}
 	 * @param location location of tile
@@ -107,20 +104,16 @@ public class Board {
 			return null;
 		return tiles.get(location);
 	}
+
 	/**
 	 * Returns a {@link Tile} with the given {@link Entity}
 	 * @param ent - entity that exists on tile
 	 * @return tile that contains given entity
 	 */
-	public Tile getTile(Entity ent){
-		ArrayList<Tile> tempTiles = new ArrayList<Tile>(tiles.values());
-		for (Tile t: tempTiles){
-			HashSet<Entity> entMap = t.getEntities();
-			for (Entity e: entMap)
-				if (e == ent)
-					return t;
-		}
-		return null; //Tile does not exist with given entity.
+	public Optional<Tile> getTile(Entity ent){
+		return tiles.values().stream()
+				.filter(t -> t.containsEntity(ent))
+				.findFirst();
 	}
 }
 

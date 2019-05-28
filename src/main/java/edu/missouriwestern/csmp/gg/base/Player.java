@@ -1,10 +1,15 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
-public class Player implements Container{
+/** represents a player within the game
+ * not an entity as a player may potentially comprise multiple entities within the game
+ */
+public class Player implements Container {
 
-	private HashSet<Entity> entities = new HashSet<>();
+	private Set<Entity> entities = new HashSet<>();
 	private int id;
 	private String name;
 
@@ -12,12 +17,13 @@ public class Player implements Container{
 		this.id = id;
 		this.name = name;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean addEntity(Entity e) { 
-		return entities.add(e)? true: false;
+	public void addEntity(Entity e) {
+		entities.add(e);
 	}
 
 	/**
@@ -35,15 +41,16 @@ public class Player implements Container{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean removeEntity(Entity e) {
-		return entities.remove(e);
+	public void removeEntity(Entity ent) {
+		entities.remove(ent);
+		Container.super.removeEntity(ent);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashSet<Entity> getEntities() { return entities; }
+	public Stream<Entity> getEntities() { return entities.stream(); }
 	
 
 	/**

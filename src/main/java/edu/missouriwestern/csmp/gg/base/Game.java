@@ -1,109 +1,125 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
-/** Base class for representing games */
-public abstract class Game {
+/** Class for managing the state of subgames using the 2D API
+ */
+public abstract class Game implements Container {
 
 	private Map<String,Board> boards = new HashMap<>();
-	private int nextEntityID = 0;
-
-	//game state and control fields
-	private boolean running = false;
-
+	private AtomicInteger nextEntityID = new AtomicInteger(1);
 	private Map<Integer, Entity> registeredEntities = new HashMap<>();
 	private Map<Integer, Player> allPlayers = new HashMap<>();
-	private double gameTime;
 
-
-	public void addPlayer(Player p) {
-		allPlayers.put(p.getID(), p);
+	/** add a player to the game
+	 * @param player player to be added to the game
+	 */
+	public void addPlayer(Player player) {
+		allPlayers.put(player.getID(), player);
 	}
 
+	/** remove player from the game
+	 *
+	 * @param player player to be removed from the game
+	 */
 	public void removePlayer(Player player) {
 		allPlayers.remove(player);
 	}
+
+	/** find player with associated ID that has joined this game
+	 * If the player has not joined this game, null will be returned
+	 * @param id ID of player to be found
+	 * @return player object with associated ID
+	 */
 	public Player getPlayer(int id) {
 		return allPlayers.get(id);
 	}
+
 	/**
 	 * Returns {@link Entity}s associated with this game
-	 * @return Set of associated Entities
+	 * @return Stream of associated Entities
 	 */
-	public HashSet<Entity> getEntities() { return new HashSet<Entity>(registeredEntities.values()); }
+	public Stream<Entity> getEntities() {
+		return registeredEntities.values().stream();
+	}
+
 	/**
 	 * Returns an {@link Entity} with the specified id
 	 * @param id entity id
 	 * @return entity 
 	 */
-	public Entity getEntity(int id) { return registeredEntities.get(id); }
+	public Entity getEntity(int id) {
+		return registeredEntities.get(id);
+	}
 
 	/**
-	 * Returns whether the game is running
-	 * @return running state
+	 * returns the id of the Entity ent
+	 * If ent is not registered with this game, a runtime exception will be thrown.
+	 * @param ent the entity whose ID is to be found
+	 * @return the id of the supplied entity
 	 */
-	public boolean isRunning() { return running; }
+	public int getEntityId(Entity ent) {
+		return registeredEntities.entrySet().stream()
+				.filter(e -> e.getValue() == ent)
+				.mapToInt(e -> e.getKey())
+				.findFirst().getAsInt();
+	}
 
-	public int getNumPlayers() { return allPlayers.size(); }
+	/** determine the number of players currently in the game
+	 *
+	 * @return the number of players in the game
+	 */
+	public int getNumPlayers() {
+		return allPlayers.size();
+	}
 	/**
 	 * Returns the set of all {@link Player}s
 	 * @return connected Players
 	 */
-	public Set<Player> getAllPlayers() { return new HashSet<Player>(allPlayers.values()); }
+	public Stream<Player> getAllPlayers() {
+		return allPlayers.values().stream();
+	}
+
 	/**
 	 * Returns the {@link Board} associated with this Game
 	 * @return associated Board
 	 */
-	public Board getBoard(String name) { return boards.get(name); }
+	public Board getBoard(String name) {
+		return boards.get(name);
+	}
+
 	/**
 	 * Registers given {@link Entity} with the Game
 	 * @param ent registering Entity
-	 * @return id given to Entity
 	 */
-	public int registerEntity(Entity ent) {
-		int id = nextEntityID++;
+	public void addEntity(Entity ent) {
+		int id = nextEntityID.getAndIncrement();
 		registeredEntities.put(id, ent);
-		return id;
 	}
+
 	/**
 	 * Removes a registered {@link Entity} and every reference to it.
 	 * @param ent Entity to be removed
 	 */
 	public void removeEntity(Entity ent) {
 
+		// remove entity from all players
 		for (Player p : allPlayers.values()) {//removes entity from players.
-			if (p.getEntities().contains(ent)) {
-				if (ent instanceof Container)
-					for (Entity e : ((Container) ent).getEntities())
-						p.addEntity(e);//transfers control of entities held by ent to the player.
-				p.removeEntity(ent);
-			}
+			p.removeEntity(ent);
 		}
-		for (Entity entity : registeredEntities.values()) {//removes entity from any other entities.
-			if (entity instanceof Container) {
-				Container c = (Container) entity;
-				if (c.getEntities().contains(ent)) {
-					if (ent instanceof Container)
-						for (Entity e : ((Container) ent).getEntities())
-							c.addEntity(e);//transfers control of entities held by ent to entity.
-					c.removeEntity(ent);
-				}
-			}
-		}
-		for(Board board : boards.values()) {
-			if (board.getTile(ent) == null) continue;
 
-			Tile t = board.getTile(ent);
-			if (t != null) {//removes entity from tiles.
-				if (t.containsEntity(ent)) {
-					if (ent instanceof Container)
-						for (Entity e : ((Container) ent).getEntities())
-							t.addEntity(e);//transfers control of entities held by ent to the tile.
-					t.removeEntity(ent);
-				}
-			}
+		// remove entity from all tiles on all boards
+		for(Board board : boards.values()) {
+			board.getTileStream().forEach(t -> t.removeEntity(ent));
 		}
-		registeredEntities.remove(ent.getID());
+
+		// remove entity from any entities that are not on a tile or with a player
+		Container.super.removeEntity(ent);
+
+		// remove entity from game
+		registeredEntities.remove(ent);
 	}
 
 }

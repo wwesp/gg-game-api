@@ -1,30 +1,30 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import java.util.Map.Entry;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 
 /** Represents spaces on the Board */
 public abstract class Tile implements Container {
 
 	private Board board;
+	private String type;
 	private Location location;
 	private HashMap<Integer,Entity> entities = new HashMap<>();
-	private char idChar = '.';
 
 
 	/**
 	 * Constructs a tile from a given {@link Board} at a given {@link Location} with the given character representation
 	 * @param board given Board
 	 * @param location initial Location
-	 * @param c character representation
-	 */
-	protected Tile(Board board, Location location, char c) {
+	 * */
+	protected Tile(Board board, Location location, String type) {
 		this.board = board;
-		this.location = location; 
-		this.idChar = c;
+		this.location = location;
+		this.type = type;
 	}
 	
 	/**
@@ -49,7 +49,7 @@ public abstract class Tile implements Container {
 	 * Returns set of {@link Entity} that it contains
 	 * @return occupying set of entities or an empty set if there are not any.
 	 */
-	public HashSet<Entity> getEntities() {return new HashSet<>(entities.values());}
+	public Stream<Entity> getEntities() {return entities.values().stream(); }
 
 	/**
 	 * Sets an {@link Entity} to occupy this tile.
@@ -58,14 +58,13 @@ public abstract class Tile implements Container {
 	 * @param ent Entity to occupy this Tile
 	 * @return weather entry into tile was successful.
 	 */
-	public boolean addEntity(Entity ent) {
-		Tile t = getBoard().getTile(ent);
-		if(t != null){
-			t.removeEntity(ent);//Removes entity from previous tile.
+	public void addEntity(Entity ent) {
+		Optional<Tile> t = getBoard().getTile(ent);
+		if(t.isPresent()){
+			t.get().removeEntity(ent); //Removes entity from previous tile.
 		}
 
 		entities.put(ent.getID(),ent);
-		return true;
 	}
 	
 	/**
@@ -100,15 +99,15 @@ public abstract class Tile implements Container {
 	 * Removes an {@link Entity} from this Tile
 	 * @param ent
 	 */
-	public boolean removeEntity(Entity ent) {
+	public void removeEntity(Entity ent) {
 		entities.remove(ent.getID());
-		return true;
+		Container.super.removeEntity(ent);
 	}
 
 	/**
-	 * Returns whether this tile is occupied by an {@link Entity}
-	 * @return whether this tile is occupied
+	 * Returns whether this tile is empty or occupied by at least one {@link Entity}
+	 * @return whether this tile is empty
 	 */
-	public boolean containsTileEntity() { return !entities.isEmpty();}
+	public boolean isEmpty() { return entities.isEmpty();}
 
 }
