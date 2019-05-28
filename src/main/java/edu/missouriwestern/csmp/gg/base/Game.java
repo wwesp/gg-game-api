@@ -8,10 +8,10 @@ import java.util.stream.Stream;
  */
 public abstract class Game implements Container {
 
-	private Map<String,Board> boards = new HashMap<>();
-	private AtomicInteger nextEntityID = new AtomicInteger(1);
-	private Map<Integer, Entity> registeredEntities = new HashMap<>();
-	private Map<Integer, Player> allPlayers = new HashMap<>();
+	private final Map<String,Board> boards = new HashMap<>();
+	private final AtomicInteger nextEntityID = new AtomicInteger(1);
+	private final Map<Integer, Entity> registeredEntities = new HashMap<>();
+	private final Map<Integer, Player> allPlayers = new HashMap<>();
 
 	/** add a player to the game
 	 * @param player player to be added to the game
@@ -95,7 +95,7 @@ public abstract class Game implements Container {
 	 * @param ent registering Entity
 	 */
 	public void addEntity(Entity ent) {
-		int id = nextEntityID.getAndIncrement();
+		var id = nextEntityID.getAndIncrement();
 		registeredEntities.put(id, ent);
 	}
 

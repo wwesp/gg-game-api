@@ -2,8 +2,8 @@ package edu.missouriwestern.csmp.gg.base;
 
 /** represents a location as row and column values on a board */
 public class Location {
-	private int column;
-	private int row;
+	private final int column;
+	private final int row;
 
 	/** 
 	 * Constructs a Location with the specified column and row
@@ -29,7 +29,7 @@ public class Location {
 
 	@Override
 	public int hashCode() {
-		int hash = 3;
+		var hash = 3;
 		hash = 97 * hash + this.column;
 		hash = 97 * hash + this.row;
 		return hash;
@@ -38,7 +38,7 @@ public class Location {
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof Location) {
-			Location l = (Location)o;
+			var l = (Location)o;
 			return l.column == column && l.row == row;
 		}
 		return false;
@@ -49,10 +49,10 @@ public class Location {
 	 * @return adjacent location
 	 */
 	public Location getAdjacentLocation(Direction direction) {
-		int column = ((direction == Direction.WEST) ? getColumn() - 1:
+		var column = ((direction == Direction.WEST) ? getColumn() - 1:
 			(direction == Direction.EAST) ? getColumn() + 1 :
 				getColumn());
-		int row = ((direction == Direction.NORTH) ? getRow() - 1 :
+		var row = ((direction == Direction.NORTH) ? getRow() - 1 :
 			(direction == Direction.SOUTH) ? getRow() + 1 :
 				getRow());
 		return new Location(column, row);

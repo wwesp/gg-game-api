@@ -2,8 +2,8 @@ package edu.missouriwestern.csmp.gg.base;
 
 /** a class representing tile-occupying entities in the game */
 public abstract class Entity {
-	private int id;
-	private Game game;
+	private final int id;
+	private final Game game;
 	private Direction heading;
 	private Player owner;
 

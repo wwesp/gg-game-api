@@ -1,19 +1,16 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import java.util.Map.Entry;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 
 /** Represents spaces on the Board */
 public abstract class Tile implements Container {
 
-	private Board board;
-	private String type;
-	private Location location;
-	private HashMap<Integer,Entity> entities = new HashMap<>();
+	private final Board board;
+	private final String type;
+	private final Location location;
+	private final HashMap<Integer,Entity> entities = new HashMap<>();
 
 
 	/**
@@ -32,14 +29,9 @@ public abstract class Tile implements Container {
 	 * @return tile location
 	 */
 	public Location getLocation() {
-		Map<Location, Tile> temp = getBoard().getTiles();
-		for (Entry<Location, Tile> entry : temp.entrySet()) {
-	        if (this.equals(entry.getValue())) {
-	            return entry.getKey();
-	        }
-	    }
-		return null;
+		return location;
 	}
+
 	/**
 	 * Return the {@link Board} associated with this tile
 	 * @return associated Board
@@ -59,7 +51,7 @@ public abstract class Tile implements Container {
 	 * @return weather entry into tile was successful.
 	 */
 	public void addEntity(Entity ent) {
-		Optional<Tile> t = getBoard().getTile(ent);
+		var t = getBoard().getTile(ent);
 		if(t.isPresent()){
 			t.get().removeEntity(ent); //Removes entity from previous tile.
 		}

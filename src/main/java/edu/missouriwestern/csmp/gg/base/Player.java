@@ -9,9 +9,9 @@ import java.util.stream.Stream;
  */
 public class Player implements Container {
 
-	private Set<Entity> entities = new HashSet<>();
-	private int id;
-	private String name;
+	private final Set<Entity> entities = new HashSet<>();
+	private final int id;
+	private final String name;
 
 	public Player(int id, String name){
 		this.id = id;

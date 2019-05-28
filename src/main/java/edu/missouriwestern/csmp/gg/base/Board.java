@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 /** represents the playing board */
 public class Board {
 
-	private Map<Location, Tile> tiles = new HashMap<>();
-	private Game game;
+	private final Map<Location, Tile> tiles = new HashMap<>();
+	private final Game game;
 
 	/**
 	 * Board Constructor
@@ -17,7 +17,7 @@ public class Board {
 	 */
 	public Board(HashMap<Location, Tile> tiles, Game game) {
 		this.game = game;
-		this.tiles = tiles;
+		this.tiles.putAll(tiles);
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class Board {
 	 * @return adjacent Tile
 	 */
 	public Tile getAdjacentTile(Tile tile, Direction direction) {
-		Location adjLoc = tile.getLocation().getAdjacentLocation(direction);
+		var adjLoc = tile.getLocation().getAdjacentLocation(direction);
 		if (locationExists(adjLoc))
 			return getTile(adjLoc);
 		return null;
@@ -55,7 +55,7 @@ public class Board {
 	 * @return adjacent Tile
 	 */
 	public Tile getAdjacentTile(Location loc, Direction direction) {
-		Location adjLoc = loc.getAdjacentLocation(direction);
+		var adjLoc = loc.getAdjacentLocation(direction);
 		if(locationExists(adjLoc))
 			return getTile(adjLoc);
 		return null;
