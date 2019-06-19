@@ -2,6 +2,7 @@ package edu.missouriwestern.csmp.gg.base;
 
 /** represents a location as row and column values on a board */
 public class Location {
+	private final Board board;
 	private final int column;
 	private final int row;
 
@@ -10,7 +11,8 @@ public class Location {
 	 * @param row this location's row
 	 * @param column this location's column
 	 */
-	public Location(int column, int row) {
+	public Location(Board board, int column, int row) {
+		this.board = board;
 		this.column = column;
 		this.row = row;
 	}
@@ -55,7 +57,7 @@ public class Location {
 		var row = ((direction == Direction.NORTH) ? getRow() - 1 :
 			(direction == Direction.SOUTH) ? getRow() + 1 :
 				getRow());
-		return new Location(column, row);
+		return new Location(board, column, row);
 	}
 
 	/**
@@ -84,7 +86,7 @@ public class Location {
 	 */
 	@Override
 	public String toString() { 
-		return String.format("(%d,%d)", column, row);
+		return String.format("(%s: %d,%d)", board.getName(), column, row);
 	}
 
 }
