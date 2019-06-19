@@ -9,14 +9,16 @@ import java.util.stream.Stream;
 public class Board {
 
 	private final Map<Location, Tile> tiles = new HashMap<>();
+	private final String name;
 	private final Game game;
 
 	/**
 	 * Board Constructor
 	 * @param tiles {@link Tile} map with {@link Location}n as the key
 	 */
-	public Board(HashMap<Location, Tile> tiles, Game game) {
+	public Board(HashMap<Location, Tile> tiles, Game game, String name) {
 		this.game = game;
+		this.name = name;
 		this.tiles.putAll(tiles);
 	}
 
@@ -114,6 +116,10 @@ public class Board {
 		return tiles.values().stream()
 				.filter(t -> t.containsEntity(ent))
 				.findFirst();
+	}
+
+	public String getName() {
+		return name;
 	}
 }
 
