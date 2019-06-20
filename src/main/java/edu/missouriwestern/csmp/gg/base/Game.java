@@ -12,6 +12,7 @@ public abstract class Game implements Container {
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
 	private final Map<Integer, Entity> registeredEntities = new HashMap<>();
 	private final Map<Integer, Player> allPlayers = new HashMap<>();
+	
 
 	/** add a player to the game
 	 * @param player player to be added to the game

@@ -1,6 +1,8 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
@@ -11,7 +13,19 @@ public abstract class Tile implements Container {
 	private final String type;
 	private final Location location;
 	private final HashMap<Integer,Entity> entities = new HashMap<>();
+	private final Map<String,String> properties;
 
+	/**
+	 * Constructs a tile from a given {@link Board} at a given {@link Location} with the given character representation
+	 * @param board given Board
+	 * @param location initial Location
+	 * */
+	protected Tile(Board board, Location location, String type, Map<String,String> properties) {
+		this.board = board;
+		this.location = location;
+		this.type = type;
+		this.properties = Collections.unmodifiableMap(properties);
+	}
 
 	/**
 	 * Constructs a tile from a given {@link Board} at a given {@link Location} with the given character representation
@@ -19,9 +33,7 @@ public abstract class Tile implements Container {
 	 * @param location initial Location
 	 * */
 	protected Tile(Board board, Location location, String type) {
-		this.board = board;
-		this.location = location;
-		this.type = type;
+		this(board, location, type, new HashMap<>());
 	}
 	
 	/**
