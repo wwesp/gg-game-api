@@ -8,8 +8,11 @@ import java.util.stream.Stream;
 
 /** represents a player within the game
  * not an entity as a player may potentially comprise multiple entities within the game
+ *
+ * Instanciating classes must include implementation of accept(Event) and forward
+ * serialized events to clients.
  */
-public class Player implements Container, HasProperties {
+public abstract class Player implements Container, HasProperties, EventListener {
 
 	private final Set<Entity> entities = new HashSet<>();
 	private final int id;

@@ -1,18 +1,35 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /** Class for managing the state of subgames using the 2D API
  */
-public abstract class Game implements Container {
+public abstract class Game implements Container, EventProducer {
 
 	private final Map<String,Board> boards = new HashMap<>();
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
-	private final Map<Integer, Entity> registeredEntities = new HashMap<>();
-	private final Map<Integer, Player> allPlayers = new HashMap<>();
-	
+	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
+	// no concurrent set, so only keys used to mimic set
+	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
+	private final Map<Integer, Player> allPlayers = new ConcurrentHashMap<>();
+
+	@Override
+	public void registerListener(EventListener listener) {
+		listeners.put(listener, null);
+	}
+
+	@Override
+	public void deregisterListener(EventListener listener) {
+		listeners.put(listener, null);
+	}
+
+	@Override
+	public Stream<EventListener> getListeners() {
+		return listeners.keySet().stream();
+	}
 
 	/** add a player to the game
 	 * @param player player to be added to the game

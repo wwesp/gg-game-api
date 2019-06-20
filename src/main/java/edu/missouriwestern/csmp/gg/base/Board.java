@@ -1,14 +1,15 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /** represents the playing board */
-public class Board {
+public class Board implements EventProducer {
 
 	private final Map<Location, Tile> tiles = new HashMap<>();
+	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
+			// no concurrent set, so only keys used to mimic set
 	private final String name;
 	private final Game game;
 
@@ -20,6 +21,21 @@ public class Board {
 		this.game = game;
 		this.name = name;
 		this.tiles.putAll(tiles);
+	}
+
+	@Override
+	public void registerListener(EventListener listener) {
+		listeners.put(listener, null);
+	}
+
+	@Override
+	public void deregisterListener(EventListener listener) {
+		listeners.put(listener, null);
+	}
+
+	@Override
+	public Stream<EventListener> getListeners() {
+		return listeners.keySet().stream();
 	}
 
 	/**

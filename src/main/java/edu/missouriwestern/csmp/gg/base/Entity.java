@@ -1,21 +1,28 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import java.util.Collections;
+import java.util.Map;
+
 /** a class representing tile-occupying entities in the game */
 public abstract class Entity {
 	private final int id;
 	private final Game game;
 	private Direction heading;
 	private Player owner;
+	private final String type;
+	private final Map<String,String> properties;
 
 
 	/**
 	 * Constructs Entity from a {@link Game}
 	 * @param game associated Game
 	 */
-	protected Entity(Game game) {
+	protected Entity(Game game, String type, Map<String,String> properties) {
 		this.game = game;
+		this.type = type;
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
+		this.properties = Collections.unmodifiableMap(properties);
 	}
 
 	/**
@@ -24,8 +31,8 @@ public abstract class Entity {
 	 * @param owner id of owner
 	 * @
 	 */
-	protected Entity(Game game, Player owner) {
-		this(game);
+	protected Entity(Game game, String type, Map<String,String> properties, Player owner) {
+		this(game, type, properties);
 		this.owner = owner;
 	}
 	
