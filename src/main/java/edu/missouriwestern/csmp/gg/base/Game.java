@@ -1,5 +1,8 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
+import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +16,7 @@ public abstract class Game implements Container, EventProducer {
 	private final long startTime;    // time when game was started or restarted
 	private final long elapsedTime;  // time elapsed in game since start or last restart
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
+	private final AtomicInteger nextEventID = new AtomicInteger(1);
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 	// no concurrent set, so only keys used to mimic set
 	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
@@ -134,6 +138,7 @@ public abstract class Game implements Container, EventProducer {
 	public void addEntity(Entity ent) {
 		var id = nextEntityID.getAndIncrement();
 		registeredEntities.put(id, ent);
+		accept(new EntityCreation(this, getNextEventId(), ent));
 	}
 
 	/**
@@ -157,6 +162,7 @@ public abstract class Game implements Container, EventProducer {
 
 		// remove entity from game
 		registeredEntities.remove(ent);
+		accept(new EntityDeletion(this, getNextEventId(), ent));
 	}
 
 	/** place an entity at a specified location */
@@ -169,4 +175,7 @@ public abstract class Game implements Container, EventProducer {
 		return entityLocations.get(ent);
 	}
 
+	public int getNextEventId() {
+		return nextEventID.getAndIncrement();
+	}
 }

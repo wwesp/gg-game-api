@@ -7,9 +7,13 @@ public class Event implements HasProperties {
 
     private final Map<String,String> properties;
     private final int id;
+    private final Game game;
+    private final long eventTime;
 
-    public Event(int id, Map<String,String> properties) {
+    public Event(Game game, int id, Map<String,String> properties) {
         this.id = id;
+        this.game = game;
+        this.eventTime = game.getGameTime();
         this.properties = Collections.unmodifiableMap(properties);
     }
 
@@ -21,6 +25,14 @@ public class Event implements HasProperties {
     @Override
     public void setProperty(String key, String value) {
         throw new UnsupportedOperationException("Event properties are immutable");
+    }
+
+    public long getEventTime() {
+        return eventTime;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public String toString() {
