@@ -21,7 +21,7 @@ public abstract class Game implements Container, EventProducer {
 	// no concurrent set, so only keys used to mimic set
 	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
 	private final Map<Entity, Location> entityLocations = new ConcurrentHashMap<>();
-	private final Map<Integer, Player> allPlayers = new ConcurrentHashMap<>();
+	private final Map<String, Player> allPlayers = new ConcurrentHashMap<>();
 
 	public Game() {
 		this.startTime = System.currentTimeMillis();
