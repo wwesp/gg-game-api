@@ -10,12 +10,30 @@ import java.util.stream.Stream;
 public abstract class Game implements Container, EventProducer {
 
 	private final Map<String,Board> boards = new HashMap<>();
+	private final long startTime;    // time when game was started or restarted
+	private final long elapsedTime;  // time elapsed in game since start or last restart
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 	// no concurrent set, so only keys used to mimic set
 	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
 	private final Map<Entity, Location> entityLocations = new ConcurrentHashMap<>();
 	private final Map<Integer, Player> allPlayers = new ConcurrentHashMap<>();
+
+	public Game() {
+		this.startTime = System.currentTimeMillis();
+		this.elapsedTime = 0;
+	}
+
+
+	/** UNIX time of the last start or restart */
+	public long getStartTime() {
+		return startTime;
+	}
+
+	/** returns the number of milliseconds elapsed since the start of the game */
+	public long getGameTime() {
+		return System.currentTimeMillis() - startTime + elapsedTime;
+	}
 
 	@Override
 	public void registerListener(EventListener listener) {
@@ -141,10 +159,12 @@ public abstract class Game implements Container, EventProducer {
 		registeredEntities.remove(ent);
 	}
 
+	/** place an entity at a specified location */
 	public void moveEntity(Entity ent, Location location) {
 		entityLocations.put(ent, location);
 	}
 
+	/** locate an entity placed on a tile */
 	public Location getEntityLocation(Entity ent) {
 		return entityLocations.get(ent);
 	}
