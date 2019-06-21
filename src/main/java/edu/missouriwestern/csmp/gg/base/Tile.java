@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 public abstract class Tile implements Container {
 
 	private final Board board;
-	private final String type;
 	private final Location location;
 	private final HashMap<Integer,Entity> entities = new HashMap<>();
 	private final Map<String,String> properties;
@@ -20,10 +19,9 @@ public abstract class Tile implements Container {
 	 * @param board given Board
 	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location, String type, Map<String,String> properties) {
+	protected Tile(Board board, Location location, Map<String,String> properties) {
 		this.board = board;
 		this.location = location;
-		this.type = type;
 		this.properties = Collections.unmodifiableMap(properties);
 	}
 
@@ -32,8 +30,8 @@ public abstract class Tile implements Container {
 	 * @param board given Board
 	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location, String type) {
-		this(board, location, type, new HashMap<>());
+	protected Tile(Board board, Location location) {
+		this(board, location, new HashMap<>());
 	}
 	
 	/**
@@ -113,5 +111,7 @@ public abstract class Tile implements Container {
 	 * @return whether this tile is empty
 	 */
 	public boolean isEmpty() { return entities.isEmpty();}
+
+
 
 }

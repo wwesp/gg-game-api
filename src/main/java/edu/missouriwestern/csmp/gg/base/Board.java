@@ -1,5 +1,8 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import net.sourcedestination.funcles.function.Function3;
+import net.sourcedestination.funcles.tuple.Pair;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -7,7 +10,8 @@ import java.util.stream.Stream;
 /** represents the playing board */
 public class Board implements EventProducer {
 
-	private final Map<Location, Tile> tiles = new HashMap<>();
+	private final Map<Location, Tile> tiles;
+	private final Map<String,Character> tileTypeChars;
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 			// no concurrent set, so only keys used to mimic set
 	private final String name;
@@ -17,10 +21,48 @@ public class Board implements EventProducer {
 	 * Board Constructor
 	 * @param tiles {@link Tile} map with {@link Location}n as the key
 	 */
-	public Board(HashMap<Location, Tile> tiles, Game game, String name) {
+	public Board(Map<String, Character> tileTypeChars, Game game, String name, Map<Location, Tile> tiles) {
 		this.game = game;
 		this.name = name;
-		this.tiles.putAll(tiles);
+		this.tileTypeChars = Collections.unmodifiableMap(tileTypeChars);
+		this.tiles = Collections.unmodifiableMap(tiles);
+	}
+
+	/** outfits board according to layout of characters in multi-line string charMap.
+	 * Characters that are keys in {@param generators} have an associated tile generator and
+	 * will have tiles generated for them. Characters that are not keys in this map can be used to
+	 * represent blank space in the map (no tile will be generated).
+	 *
+	 * @param tileTypeChars
+	 * @param game
+	 * @param name
+	 * @param charMap
+	 * @param generators
+	 * @param tileProperties
+	 */
+	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
+				 Map<Character, Function3<Board,Location,Map<String,String>,Tile>> generators,
+				 Map<Pair<Integer>, Map<String,String>> tileProperties) {
+		var tiles = new HashMap<Location,Tile>();
+		int x=0, y=0;
+		for(char c : charMap.toCharArray()) {
+			if(c == '\n') { // reset to next row
+				y++; // increment row
+				x = 0; // start at first column
+			} else if(tileTypeChars.containsKey(c)) {  // create a tile in this column
+				var location = new Location(this, x, y); // location of this tile
+				tiles.put(location,
+						generators.get(c).apply(this, location, // generate a tile
+						tileProperties.containsKey(Pair.makePair(x,y)) ?  // get properties if they exist
+								tileProperties.get(Pair.makePair(x,y)) :
+								new HashMap<String,String>()));
+				x++; // increment column
+			}
+		}
+		this.game = game;
+		this.name = name;
+		this.tileTypeChars = Collections.unmodifiableMap(tileTypeChars);
+		this.tiles = Collections.unmodifiableMap(tiles);
 	}
 
 	@Override
