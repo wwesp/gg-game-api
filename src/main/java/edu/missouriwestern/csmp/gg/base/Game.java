@@ -178,4 +178,17 @@ public abstract class Game implements Container, EventProducer {
 	public int getNextEventId() {
 		return nextEventID.getAndIncrement();
 	}
+
+	public String toString() {
+		return "{ \"type\": " + getClass().getSimpleName() +
+				" \"elapsedTime\":" + getGameTime() +
+				" \"entities\": {" + // serialize all current entities
+					getEntities()
+							.map(Entity::toString)
+							.reduce((s1, s2) -> s1 + ", " + s2)
+							.orElse("") + "}" +
+				"}";
+	}
+
+
 }

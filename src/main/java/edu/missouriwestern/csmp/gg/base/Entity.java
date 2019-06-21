@@ -79,7 +79,6 @@ public abstract class Entity implements HasProperties {
 	 */
 	public abstract String getType();
 
-
 	public String toString() {
 		return "{ \"id\": " + id +
 				", \"type\": " + getClass().getSimpleName() +
