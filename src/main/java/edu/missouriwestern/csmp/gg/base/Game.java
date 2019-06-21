@@ -14,6 +14,7 @@ public abstract class Game implements Container, EventProducer {
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 	// no concurrent set, so only keys used to mimic set
 	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
+	private final Map<Entity, Location> entityLocations = new ConcurrentHashMap<>();
 	private final Map<Integer, Player> allPlayers = new ConcurrentHashMap<>();
 
 	@Override
@@ -138,6 +139,14 @@ public abstract class Game implements Container, EventProducer {
 
 		// remove entity from game
 		registeredEntities.remove(ent);
+	}
+
+	public void moveEntity(Entity ent, Location location) {
+		entityLocations.put(ent, location);
+	}
+
+	public Location getEntityLocation(Entity ent) {
+		return entityLocations.get(ent);
 	}
 
 }

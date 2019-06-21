@@ -4,22 +4,19 @@ import java.util.Collections;
 import java.util.Map;
 
 /** a class representing tile-occupying entities in the game */
-public abstract class Entity {
+public abstract class Entity implements HasProperties {
 	private final int id;
 	private final Game game;
 	private Direction heading;
 	private Player owner;
-	private final String type;
 	private final Map<String,String> properties;
-
 
 	/**
 	 * Constructs Entity from a {@link Game}
 	 * @param game associated Game
 	 */
-	protected Entity(Game game, String type, Map<String,String> properties) {
+	protected Entity(Game game, Map<String,String> properties) {
 		this.game = game;
-		this.type = type;
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
 		this.properties = Collections.unmodifiableMap(properties);
@@ -31,8 +28,8 @@ public abstract class Entity {
 	 * @param owner id of owner
 	 * @
 	 */
-	protected Entity(Game game, String type, Map<String,String> properties, Player owner) {
-		this(game, type, properties);
+	protected Entity(Game game, Map<String,String> properties, Player owner) {
+		this(game, properties);
 		this.owner = owner;
 	}
 	
@@ -81,5 +78,17 @@ public abstract class Entity {
 	 * @return type
 	 */
 	public abstract String getType();
+
+
+	public String toString() {
+		return "{ \"id\": " + id +
+				", \"type\": " + getClass().getSimpleName() +
+				(getGame().getEntityLocation(this) != null ? // does this entity have a location?
+						", \"location\": " + getGame().getEntityLocation(this) +
+						", \"heading\": " + getHeading() :
+						"") + // if not, don't include it or the heading in the JSON
+				", \"properties\": " + this.serializeProperties() +
+				"}";
+	}
 	
 }
