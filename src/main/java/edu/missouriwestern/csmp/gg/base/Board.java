@@ -31,7 +31,8 @@ public class Board implements EventProducer {
 	/** outfits board according to layout of characters in multi-line string charMap.
 	 * Characters that are keys in {@param generators} have an associated tile generator and
 	 * will have tiles generated for them. Characters that are not keys in this map can be used to
-	 * represent blank space in the map (no tile will be generated).
+	 * represent blank space in the map (no tile will be generated). Blank spaces are always treated
+	 * as empty cells and cannot be used.
 	 *
 	 * @param tileTypeChars
 	 * @param game
@@ -178,6 +179,38 @@ public class Board implements EventProducer {
 
 	public String getName() {
 		return name;
+	}
+
+	public int getWidth() {
+		return tiles.keySet().stream()
+				.mapToInt(Location::getRow)
+				.max().getAsInt() + 1;
+	}
+
+	public int getHeight() {
+		return tiles.keySet().stream()
+				.mapToInt(Location::getColumn)
+				.max().getAsInt() + 1;
+	}
+
+
+	/** returns a multi-line string representing the layout of tile types on this board.
+	 * The names of classes represented by different characters in this string are held in tileTypeChars.
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		for(int r = 0; r < getWidth(); r++) {
+			for(int c = 0; c < getHeight(); c++) {
+				Location location = new Location(this, r, c);
+				if(tiles.containsKey(location))
+					sb.append(tileTypeChars.get(tiles.get(location).getClass().getSimpleName()));
+				else sb.append(' ');
+			}
+			sb.append('\n');
+		}
+		return sb.toString();
 	}
 }
 
