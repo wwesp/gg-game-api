@@ -13,4 +13,10 @@ public interface HasProperties {
                 key + " in " +this);
         return m.get(key);
     }
+
+    public default String serializeProperties() {
+        return "{" + getProperties().entrySet().stream()
+                .map(e -> "\"" + e.getKey() + "\": " + e.getValue())
+                .reduce((s1, s2) -> s1 + ","+ s2).orElse("") + "}";
+    }
 }
