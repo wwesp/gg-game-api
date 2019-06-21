@@ -15,19 +15,17 @@ import java.util.stream.Stream;
 public abstract class Player implements Container, HasProperties, EventListener {
 
 	private final Set<Entity> entities = new HashSet<>();
-	private final int id;
-	private final String name;
+	private final String id;
 	private final Map<String,String> properties;
 
-	public Player(int id, String name, Map<String,String> properties){
+	public Player(String id, Map<String,String> properties){
 		this.id = id;
-		this.name = name;
 		this.properties = new HashMap<>(properties);
 	}
 
 
-	public Player(int id, String name){
-		this(id, name, new HashMap<>());
+	public Player(String id, String name){
+		this(id, new HashMap<>());
 	}
 
 	@Override
@@ -79,18 +77,17 @@ public abstract class Player implements Container, HasProperties, EventListener 
 	 * Returns the ID of the Player
 	 * @return the ID of the Player
 	 */
-	public int getID(){ return id; }
+	public String getID(){ return id; }
 
-	/**
-	 * Returns the Player's name
-	 * @return  the Player's name
-	 */
-	public String getName(){ return name; }
-	
 	@Override
-	public String toString(){
-		return getName() + " " + getID();
+	public String toString() {
+		return "{ \"id\": " + getID() +
+				" \"properties\": " + serializeProperties() +
+				" \"inventory\": {" +
+				getEntities()
+						.map(Entity::toString)
+						.reduce((s1, s2) -> s1 + ", " + s2)
+						.orElse("") + "}" +
+				"}";
 	}
-
-	
 }
