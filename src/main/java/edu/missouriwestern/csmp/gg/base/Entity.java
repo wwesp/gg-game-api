@@ -81,20 +81,5 @@ public abstract class Entity {
 	 * @return type
 	 */
 	public abstract String getType();
-
-	/**
-	 * Move the Entity to a given {@link Location}
-	 * @param l location of move
-	 * @return whether move was successful
-	 */
-	public abstract boolean move(Location l);
-
-	/**
-	 * Asks if the the entity can share the tile.
-	 * @param ent pushing entity if any
-	 * @return whether the entity allows sharing of the tile.
-	 * 
-	 */
-	public abstract boolean shareTile(Entity ent);
 	
 }
