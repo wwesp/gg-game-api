@@ -22,4 +22,12 @@ public class Event implements HasProperties {
     public void setProperty(String key, String value) {
         throw new UnsupportedOperationException("Event properties are immutable");
     }
+
+    public String toString() {
+        return "{ \"id\": " + id +
+                ", \"type\": " + getClass().getSimpleName() +
+                ", \"properties\": " + this.serializeProperties() +
+        "}";
+
+    }
 }
