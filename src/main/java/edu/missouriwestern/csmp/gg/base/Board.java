@@ -43,20 +43,22 @@ public class Board implements EventProducer {
 	 */
 	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
 				 Map<Character, Function3<Board,Location,Map<String,String>,Tile>> generators,
-				 Map<Pair<Integer>, Map<String,String>> tileProperties) {
+				 Map<Location, Map<String,String>> tileProperties) {
 		var tiles = new HashMap<Location,Tile>();
 		int x=0, y=0;
 		for(char c : charMap.toCharArray()) {
 			if(c == '\n') { // reset to next row
 				y++; // increment row
 				x = 0; // start at first column
-			} else if(tileTypeChars.containsKey(c)) {  // create a tile in this column
-				var location = new Location(this, x, y); // location of this tile
-				tiles.put(location,
-						generators.get(c).apply(this, location, // generate a tile
-						tileProperties.containsKey(Pair.makePair(x,y)) ?  // get properties if they exist
-								tileProperties.get(Pair.makePair(x,y)) :
-								new HashMap<String,String>()));
+			} else  {  // create a tile in this column
+				if(tileTypeChars.containsKey(c)) {
+					var location = new Location(this, x, y); // location of this tile
+					tiles.put(location,
+							generators.get(c).apply(this, location, // generate a tile
+									tileProperties.containsKey(Pair.makePair(x, y)) ?  // get properties if they exist
+											tileProperties.get(Pair.makePair(x, y)) :
+											new HashMap<String, String>()));
+				}
 				x++; // increment column
 			}
 		}

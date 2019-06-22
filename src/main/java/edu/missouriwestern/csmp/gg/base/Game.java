@@ -184,9 +184,9 @@ public abstract class Game implements Container, EventProducer {
 				" \"elapsedTime\":" + getGameTime() +
 				" \"entities\": {" + // serialize all current entities
 					getEntities()
-							.map(Entity::toString)
-							.reduce((s1, s2) -> s1 + ", " + s2)
-							.orElse("") + "}" +
+							.map(Entity::toString) // convert to strings
+							.reduce((s1, s2) -> s1 + ", " + s2) // reduce to comma-separated string
+							.orElse("") + "}" +  // empty string if no entities
 				"}";
 	}
 
