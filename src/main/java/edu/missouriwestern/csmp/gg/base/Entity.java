@@ -18,7 +18,17 @@ public abstract class Entity implements HasProperties {
 		this.game = game;
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
-		this.properties = Collections.unmodifiableMap(properties);
+		this.properties = properties;
+	}
+
+	@Override
+	public Map<String,String> getProperties() {
+		return Collections.unmodifiableMap(properties);
+	}
+
+	@Override
+	public void setProperty(String key, String value) {
+		properties.put(key, value);
 	}
 
 	/**
