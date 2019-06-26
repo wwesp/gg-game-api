@@ -7,10 +7,11 @@ import java.util.stream.Stream;
 
 
 /** Represents spaces on the Board */
-public abstract class Tile implements Container {
+public final class Tile implements Container {
 
 	private final Board board;
 	private final Location location;
+	private final String type;
 	private final HashMap<Integer,Entity> entities = new HashMap<>();
 	private final Map<String,String> properties;
 
@@ -19,9 +20,10 @@ public abstract class Tile implements Container {
 	 * @param board given Board
 	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location, Map<String,String> properties) {
+	protected Tile(Board board, Location location, String type, Map<String,String> properties) {
 		this.board = board;
 		this.location = location;
+		this.type = type;
 		this.properties = Collections.unmodifiableMap(properties);
 	}
 
@@ -30,8 +32,8 @@ public abstract class Tile implements Container {
 	 * @param board given Board
 	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location) {
-		this(board, location, new HashMap<>());
+	protected Tile(Board board, Location location, String type) {
+		this(board, location, type, new HashMap<>());
 	}
 	
 	/**
@@ -41,6 +43,9 @@ public abstract class Tile implements Container {
 	public Location getLocation() {
 		return location;
 	}
+
+
+	public String getType() { return type; }
 
 	/**
 	 * Return the {@link Board} associated with this tile

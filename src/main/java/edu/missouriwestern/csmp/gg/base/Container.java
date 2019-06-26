@@ -38,4 +38,9 @@ public interface Container {
 	public Stream<Entity> getEntities();
 	
 
+	public default boolean containsEntity(Entity ent) {
+		return getEntities()
+				.filter(e -> e == ent)
+				.findFirst().isPresent();
+	}
 }

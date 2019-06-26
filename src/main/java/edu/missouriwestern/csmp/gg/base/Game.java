@@ -175,6 +175,14 @@ public abstract class Game implements Container, EventProducer {
 		return entityLocations.get(ent);
 	}
 
+	/** locate an entity contained by another entity */
+	public Entity getContainingEntity(Entity ent) {
+		return getEntities()
+				.filter(e  -> e instanceof Container)
+				.filter(c -> ((Container)c).containsEntity(ent))
+				.findFirst().orElseGet(null);
+	}
+
 	public int getNextEventId() {
 		return nextEventID.getAndIncrement();
 	}

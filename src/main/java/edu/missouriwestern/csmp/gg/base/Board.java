@@ -1,7 +1,7 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import net.sourcedestination.funcles.function.Function3;
 import net.sourcedestination.funcles.tuple.Pair;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +29,7 @@ public class Board implements EventProducer {
 	}
 
 	/** outfits board according to layout of characters in multi-line string charMap.
-	 * Characters that are keys in {@param generators} have an associated tile generator and
-	 * will have tiles generated for them. Characters that are not keys in this map can be used to
+	 * Characters that are not keys in {@param tileTypeChars} can be used to
 	 * represent blank space in the map (no tile will be generated). Blank spaces are always treated
 	 * as empty cells and cannot be used.
 	 *
@@ -38,12 +37,11 @@ public class Board implements EventProducer {
 	 * @param game
 	 * @param name
 	 * @param charMap
-	 * @param generators
 	 * @param tileProperties
 	 */
 	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
-				 Map<Character, Function3<Board,Location,Map<String,String>,Tile>> generators,
 				 Map<Location, Map<String,String>> tileProperties) {
+		var charToType = new DualHashBidiMap<>(tileTypeChars);
 		var tiles = new HashMap<Location,Tile>();
 		int x=0, y=0;
 		for(char c : charMap.toCharArray()) {
@@ -54,7 +52,8 @@ public class Board implements EventProducer {
 				if(tileTypeChars.containsKey(c)) {
 					var location = new Location(this, x, y); // location of this tile
 					tiles.put(location,
-							generators.get(c).apply(this, location, // generate a tile
+							new Tile(this, location, // generate a tile
+                                    charToType.inverseBidiMap().get(c),
 									tileProperties.containsKey(Pair.makePair(x, y)) ?  // get properties if they exist
 											tileProperties.get(Pair.makePair(x, y)) :
 											new HashMap<String, String>()));
@@ -207,7 +206,7 @@ public class Board implements EventProducer {
 			for(int c = 0; c < getHeight(); c++) {
 				Location location = new Location(this, r, c);
 				if(tiles.containsKey(location))
-					sb.append(tileTypeChars.get(tiles.get(location).getClass().getSimpleName()));
+					sb.append(tileTypeChars.get(tiles.get(location).getType()));
 				else sb.append(' ');
 			}
 			sb.append('\n');
