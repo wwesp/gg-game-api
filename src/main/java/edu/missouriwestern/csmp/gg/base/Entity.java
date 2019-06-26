@@ -8,7 +8,6 @@ public abstract class Entity implements HasProperties {
 	private final int id;
 	private final Game game;
 	private Direction heading;
-	private Player owner;
 	private final Map<String,String> properties;
 
 	/**
@@ -20,31 +19,6 @@ public abstract class Entity implements HasProperties {
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
 		this.properties = Collections.unmodifiableMap(properties);
-	}
-
-	/**
-	 * Constructs Entity from a {@link Game} and player id for owner
-	 * @param game associated Game
-	 * @param owner id of owner
-	 * @
-	 */
-	protected Entity(Game game, Map<String,String> properties, Player owner) {
-		this(game, properties);
-		this.owner = owner;
-	}
-	
-	/**
-	 * returns the owner of the entity
-	 * @return the owner of the entity
-	 */
-	public Player getOwner() { return owner; }
-	
-	/**
-	 * Sets the owner of the entity
-	 * @param owner the player
-	 */
-	public void setOwner(Player owner) {
-		this.owner = owner;
 	}
 
 	/**
