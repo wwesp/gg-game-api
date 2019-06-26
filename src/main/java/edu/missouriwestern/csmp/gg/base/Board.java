@@ -40,7 +40,8 @@ public class Board implements EventProducer {
 	 * @param tileProperties
 	 */
 	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
-				 Map<Location, Map<String,String>> tileProperties) {
+                 Map<Character, Map<String,String>> tileTypeProperties,
+                 Map<Location, Map<String,String>> tileProperties) {
 		var charToType = new DualHashBidiMap<>(tileTypeChars);
 		var tiles = new HashMap<Location,Tile>();
 		int x=0, y=0;
@@ -51,12 +52,16 @@ public class Board implements EventProducer {
 			} else  {  // create a tile in this column
 				if(tileTypeChars.containsKey(c)) {
 					var location = new Location(this, x, y); // location of this tile
+                    var properties = new HashMap<String,String>();
+
+                    if(tileTypeProperties.containsKey(c))  // if properties for tile type were specified
+                        properties.putAll(tileTypeProperties.get(c));
+
+                    if(tileProperties.containsKey(Pair.makePair(x, y)))  // if properties for this location were specified
+                        properties.putAll(tileProperties.get(Pair.makePair(x, y)));
 					tiles.put(location,
 							new Tile(this, location, // generate a tile
-                                    charToType.inverseBidiMap().get(c),
-									tileProperties.containsKey(Pair.makePair(x, y)) ?  // get properties if they exist
-											tileProperties.get(Pair.makePair(x, y)) :
-											new HashMap<String, String>()));
+                                    charToType.inverseBidiMap().get(c), properties));
 				}
 				x++; // increment column
 			}
