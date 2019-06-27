@@ -1,5 +1,6 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
 import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
 import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
 
@@ -191,16 +192,18 @@ public abstract class Game implements Container, EventProducer {
 		return nextEventID.getAndIncrement();
 	}
 
-	public String toString() {
-		return "{ \"type\": " + getClass().getSimpleName() +
-				" \"elapsedTime\":" + getGameTime() +
-				" \"entities\": {" + // serialize all current entities
-					getEntities()
-							.map(Entity::toString) // convert to strings
-							.reduce((s1, s2) -> s1 + ", " + s2) // reduce to comma-separated string
-							.orElse("") + "}" +  // empty string if no entities
-				"}";
-	}
 
+
+	/** returns a JSON representation of this game
+	 */
+	@Override
+	public String toString() {
+		var gsonBuilder = new GsonBuilder();
+		var gson = gsonBuilder.create();
+		var m = new HashMap<String,Object>();
+		m.put("type", getClass().getSimpleName());
+		m.put("elapsed-time", getGameTime());
+		return gson.toJson(m);
+	}
 
 }
