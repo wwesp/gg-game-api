@@ -1,5 +1,6 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
 import net.sourcedestination.funcles.tuple.Pair;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
@@ -197,8 +198,7 @@ public class Board implements EventProducer {
 	 * The names of classes represented by different characters in this string are held in tileTypeChars.
 	 * @return
 	 */
-	@Override
-	public String toString() {
+	public String getTileMap() {
 		StringBuffer sb = new StringBuffer();
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
@@ -210,6 +210,20 @@ public class Board implements EventProducer {
 			sb.append('\n');
 		}
 		return sb.toString();
+	}
+
+	/** returns a JSON representation of
+	 */
+	@Override
+	public String toString() {
+		var gsonBuilder = new GsonBuilder();
+		var gson = gsonBuilder.create();
+		var m = new HashMap<String,Object>();
+		m.put("height", getHeight());
+		m.put("width", getWidth());
+		m.put("tilemap", getTileMap());
+		m.put("tileTypes", tileTypeChars);
+		return gson.toJson(m);
 	}
 }
 
