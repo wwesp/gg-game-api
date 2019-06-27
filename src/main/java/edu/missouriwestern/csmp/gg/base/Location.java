@@ -11,7 +11,7 @@ public class Location {
 	 * @param row this location's row
 	 * @param column this location's column
 	 */
-	public Location(Board board, int column, int row) {
+	public Location(Board board, int row, int column) {
 		this.board = board;
 		this.column = column;
 		this.row = row;
@@ -57,7 +57,7 @@ public class Location {
 		var row = ((direction == Direction.NORTH) ? getRow() - 1 :
 			(direction == Direction.SOUTH) ? getRow() + 1 :
 				getRow());
-		return new Location(board, column, row);
+		return new Location(board, row, column);
 	}
 
 	/**
@@ -86,7 +86,8 @@ public class Location {
 	 */
 	@Override
 	public String toString() { 
-		return String.format("(%s: %d,%d)", board.getName(), column, row);
+		return String.format("(%s: %d,%d)",
+				board != null ? board.getName() : "", column, row);
 	}
 
 }

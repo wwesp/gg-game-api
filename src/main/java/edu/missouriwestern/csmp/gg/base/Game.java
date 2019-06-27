@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  */
 public abstract class Game implements Container, EventProducer {
 
-	private final Map<String,Board> boards = new HashMap<>();
+	private final Map<String,Board> boards = new ConcurrentHashMap<>();
 	private final long startTime;    // time when game was started or restarted
 	private final long elapsedTime;  // time elapsed in game since start or last restart
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
@@ -163,6 +163,10 @@ public abstract class Game implements Container, EventProducer {
 		// remove entity from game
 		registeredEntities.remove(ent);
 		accept(new EntityDeletion(this, getNextEventId(), ent));
+	}
+
+	public void addBoard(String boardId, Board board) {
+		boards.put(boardId, board);
 	}
 
 	/** place an entity at a specified location */

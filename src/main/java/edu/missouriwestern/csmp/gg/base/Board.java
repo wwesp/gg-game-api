@@ -5,10 +5,12 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /** represents the playing board */
 public class Board implements EventProducer {
+	private static Logger logger = Logger.getLogger(EventProducer.class.getCanonicalName());
 
 	private final Map<Location, Tile> tiles;
 	private final Map<String,Character> tileTypeChars;
@@ -16,17 +18,6 @@ public class Board implements EventProducer {
 			// no concurrent set, so only keys used to mimic set
 	private final String name;
 	private final Game game;
-
-	/**
-	 * Board Constructor
-	 * @param tiles {@link Tile} map with {@link Location}n as the key
-	 */
-	public Board(Map<String, Character> tileTypeChars, Game game, String name, Map<Location, Tile> tiles) {
-		this.game = game;
-		this.name = name;
-		this.tileTypeChars = Collections.unmodifiableMap(tileTypeChars);
-		this.tiles = Collections.unmodifiableMap(tiles);
-	}
 
 	/** outfits board according to layout of characters in multi-line string charMap.
 	 * Characters that are not keys in {@param tileTypeChars} can be used to
@@ -42,7 +33,7 @@ public class Board implements EventProducer {
 	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
                  Map<Character, Map<String,String>> tileTypeProperties,
                  Map<Location, Map<String,String>> tileProperties) {
-		var charToType = new DualHashBidiMap<>(tileTypeChars);
+		var charToType = new DualHashBidiMap<>(tileTypeChars).inverseBidiMap();
 		var tiles = new HashMap<Location,Tile>();
 		int x=0, y=0;
 		for(char c : charMap.toCharArray()) {
@@ -50,7 +41,7 @@ public class Board implements EventProducer {
 				y++; // increment row
 				x = 0; // start at first column
 			} else  {  // create a tile in this column
-				if(tileTypeChars.containsKey(c)) {
+				if(charToType.containsKey(c)) {
 					var location = new Location(this, x, y); // location of this tile
                     var properties = new HashMap<String,String>();
 
@@ -59,9 +50,11 @@ public class Board implements EventProducer {
 
                     if(tileProperties.containsKey(Pair.makePair(x, y)))  // if properties for this location were specified
                         properties.putAll(tileProperties.get(Pair.makePair(x, y)));
-					tiles.put(location,
-							new Tile(this, location, // generate a tile
-                                    charToType.inverseBidiMap().get(c), properties));
+                    var tile = new Tile(this,
+							location,
+							charToType.get(c),
+							properties);
+					tiles.put(location, tile);
 				}
 				x++; // increment column
 			}
@@ -207,9 +200,9 @@ public class Board implements EventProducer {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		for(int r = 0; r < getWidth(); r++) {
-			for(int c = 0; c < getHeight(); c++) {
-				Location location = new Location(this, r, c);
+		for(int r = 0; r < getHeight(); r++) {
+			for(int c = 0; c < getWidth(); c++) {
+				Location location = new Location(this, c, r);
 				if(tiles.containsKey(location))
 					sb.append(tileTypeChars.get(tiles.get(location).getType()));
 				else sb.append(' ');
