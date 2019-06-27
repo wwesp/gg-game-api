@@ -29,6 +29,8 @@ public class Location {
 	 */
 	public int getRow() { return row; }
 
+	public Board getBoard() { return board; }
+
 	@Override
 	public int hashCode() {
 		var hash = 3;

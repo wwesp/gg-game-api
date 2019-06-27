@@ -212,7 +212,7 @@ public class Board implements EventProducer {
 		return sb.toString();
 	}
 
-	/** returns a JSON representation of
+	/** returns a JSON representation of this board and its properties
 	 */
 	@Override
 	public String toString() {

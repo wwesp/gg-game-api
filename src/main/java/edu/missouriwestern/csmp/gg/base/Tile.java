@@ -1,13 +1,17 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
+import edu.missouriwestern.csmp.gg.base.events.TileStateUpdateEvent;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 
 /** Represents spaces on the Board */
-public final class Tile implements Container {
+public final class Tile implements Container, HasProperties {
 
 	private final Board board;
 	private final Location location;
@@ -24,7 +28,7 @@ public final class Tile implements Container {
 		this.board = board;
 		this.location = location;
 		this.type = type;
-		this.properties = Collections.unmodifiableMap(properties);
+		this.properties = new ConcurrentHashMap<>(properties);
 	}
 
 	/**
@@ -117,6 +121,30 @@ public final class Tile implements Container {
 	 */
 	public boolean isEmpty() { return entities.isEmpty();}
 
+	@Override
+	public Map<String,String> getProperties() {
+		return properties;
+	}
 
+	@Override
+	public void setProperty(String key, String value) {
+		properties.put(key, value);
+		board.accept(new TileStateUpdateEvent(location));
+	}
+
+	/** returns a JSON representation of this tile and its properties
+	 */
+	@Override
+	public String toString() {
+		var gsonBuilder = new GsonBuilder();
+		var gson = gsonBuilder.create();
+		var m = new HashMap<String,Object>();
+		m.put("row", getLocation().getRow());
+		m.put("column", getLocation().getColumn());
+		m.put("board", getBoard().getName());
+		m.put("type", type);
+		m.put("properties", properties);
+		return gson.toJson(m);
+	}
 
 }
