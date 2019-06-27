@@ -36,28 +36,28 @@ public class Board implements EventProducer {
                  Map<Location, Map<String,String>> tileProperties) {
 		var charToType = new DualHashBidiMap<>(tileTypeChars).inverseBidiMap();
 		var tiles = new HashMap<Location,Tile>();
-		int x=0, y=0;
+		int col=0, row=0;
 		for(char c : charMap.toCharArray()) {
 			if(c == '\n') { // reset to next row
-				y++; // increment row
-				x = 0; // start at first column
+				row++; // increment row
+				col = 0; // start at first column
 			} else  {  // create a tile in this column
 				if(charToType.containsKey(c)) {
-					var location = new Location(this, x, y); // location of this tile
+					var location = new Location(this, col, row); // location of this tile
                     var properties = new HashMap<String,String>();
 
                     if(tileTypeProperties.containsKey(c))  // if properties for tile type were specified
                         properties.putAll(tileTypeProperties.get(c));
 
-                    if(tileProperties.containsKey(Pair.makePair(x, y)))  // if properties for this location were specified
-                        properties.putAll(tileProperties.get(Pair.makePair(x, y)));
+                    if(tileProperties.containsKey(Pair.makePair(col, row)))  // if properties for this location were specified
+                        properties.putAll(tileProperties.get(Pair.makePair(col, row)));
                     var tile = new Tile(this,
 							location,
 							charToType.get(c),
 							properties);
 					tiles.put(location, tile);
 				}
-				x++; // increment column
+				col++; // increment column
 			}
 		}
 		this.game = game;
@@ -183,13 +183,13 @@ public class Board implements EventProducer {
 
 	public int getWidth() {
 		return tiles.keySet().stream()
-				.mapToInt(Location::getRow)
+				.mapToInt(Location::getColumn)
 				.max().getAsInt() + 1;
 	}
 
 	public int getHeight() {
 		return tiles.keySet().stream()
-				.mapToInt(Location::getColumn)
+				.mapToInt(Location::getRow)
 				.max().getAsInt() + 1;
 	}
 
