@@ -1,9 +1,12 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** represents a player within the game
@@ -79,15 +82,17 @@ public abstract class Player implements Container, HasProperties, EventListener 
 	 */
 	public String getID(){ return id; }
 
+
+	/** returns a JSON representation of this player and its properties
+	 */
 	@Override
 	public String toString() {
-		return "{ \"id\": " + getID() +
-				" \"properties\": " + serializeProperties() +
-				" \"inventory\": {" +
-				getEntities()
-						.map(Entity::toString)
-						.reduce((s1, s2) -> s1 + ", " + s2)
-						.orElse("") + "}" +
-				"}";
+		var gsonBuilder = new GsonBuilder();
+		var gson = gsonBuilder.create();
+		var m = new HashMap<String,Object>();
+		m.put("id", getID());
+		m.put("inventory", getEntities().map(Entity::getID).collect(Collectors.toList()));
+		m.put("properties", properties);
+		return gson.toJson(m);
 	}
 }
