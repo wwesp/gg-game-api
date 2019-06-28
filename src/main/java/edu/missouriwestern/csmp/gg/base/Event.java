@@ -1,6 +1,7 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Event implements HasProperties {
@@ -9,6 +10,18 @@ public class Event implements HasProperties {
     private final int id;
     private final Game game;
     private final long eventTime;
+
+    public Event(Game game) {
+        this(game, game.getNextEventId(), new HashMap<>());
+    }
+
+    public Event(Game game, int id) {
+        this(game, id, new HashMap<>());
+    }
+
+    public Event(Game game, Map<String,String> properties) {
+        this(game, game.getNextEventId(), properties);
+    }
 
     public Event(Game game, int id, Map<String,String> properties) {
         this.id = id;

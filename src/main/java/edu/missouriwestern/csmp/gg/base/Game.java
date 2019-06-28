@@ -42,12 +42,12 @@ public abstract class Game implements Container, EventProducer {
 
 	@Override
 	public void registerListener(EventListener listener) {
-		listeners.put(listener, null);
+		listeners.put(listener, "thing");
 	}
 
 	@Override
 	public void deregisterListener(EventListener listener) {
-		listeners.put(listener, null);
+		listeners.put(listener, "thing");
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public abstract class Game implements Container, EventProducer {
 		return getEntities()
 				.filter(e  -> e instanceof Container)
 				.filter(c -> ((Container)c).containsEntity(ent))
-				.findFirst().orElseGet(null);
+				.findFirst().orElse(null);
 	}
 
 	public int getNextEventId() {
