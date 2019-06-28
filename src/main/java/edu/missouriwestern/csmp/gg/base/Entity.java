@@ -1,6 +1,9 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /** a class representing tile-occupying entities in the game */
@@ -63,15 +66,27 @@ public abstract class Entity implements HasProperties {
 	 */
 	public abstract String getType();
 
+	/** returns a JSON representation of this tile and its properties
+	 */
+	@Override
 	public String toString() {
-		return "{ \"id\": " + id +
-				", \"type\": " + getClass().getSimpleName() +
-				(getGame().getEntityLocation(this) != null ? // does this entity have a location?
-						", \"location\": " + getGame().getEntityLocation(this) +
-						", \"heading\": " + getHeading() :
-						"") + // if not, don't include it or the heading in the JSON
-				", \"properties\": " + this.serializeProperties() +
-				"}";
+		var gsonBuilder = new GsonBuilder();
+		var gson = gsonBuilder.create();
+		var m = new HashMap<String,Object>();
+		var location = game.getEntityLocation(this);
+		var container = game.getContainingEntity(this);
+		if(location != null) {
+			m.put("board", location.getBoard().getName());
+			m.put("column", location.getColumn());
+			m.put("row", location.getRow());
+			m.put("heading", getHeading());
+		} else if(container != null) {
+			m.put("container", container.getID());
+		}
+		m.put("id", getID());
+		m.put("type", getType());
+		m.put("properties", properties);
+		return gson.toJson(m);
 	}
 	
 }
