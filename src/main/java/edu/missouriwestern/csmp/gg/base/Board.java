@@ -14,7 +14,7 @@ public class Board implements EventProducer {
 	private static Logger logger = Logger.getLogger(EventProducer.class.getCanonicalName());
 
 	private final Map<Location, Tile> tiles;
-	private final Map<String,Character> tileTypeChars;
+	private final Map<Character,String> tileTypeChars;
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 			// no concurrent set, so only keys used to mimic set
 	private final String name;
@@ -31,10 +31,9 @@ public class Board implements EventProducer {
 	 * @param charMap
 	 * @param tileProperties
 	 */
-	public Board(Map<String, Character> tileTypeChars, Game game, String name, String charMap,
+	public Board(Map<Character, String> tileTypeChars, Game game, String name, String charMap,
                  Map<Character, Map<String,String>> tileTypeProperties,
                  Map<Location, Map<String,String>> tileProperties) {
-		var charToType = new DualHashBidiMap<>(tileTypeChars).inverseBidiMap();
 		var tiles = new HashMap<Location,Tile>();
 		int col=0, row=0;
 		for(char c : charMap.toCharArray()) {
@@ -42,7 +41,7 @@ public class Board implements EventProducer {
 				row++; // increment row
 				col = 0; // start at first column
 			} else  {  // create a tile in this column
-				if(charToType.containsKey(c)) {
+				if(tileTypeChars.containsKey(c)) {
 					var location = new Location(this, col, row); // location of this tile
                     var properties = new HashMap<String,String>();
 
@@ -53,7 +52,7 @@ public class Board implements EventProducer {
                         properties.putAll(tileProperties.get(Pair.makePair(col, row)));
                     var tile = new Tile(this,
 							location,
-							charToType.get(c),
+							tileTypeChars.get(c),
 							properties);
 					tiles.put(location, tile);
 				}
@@ -199,12 +198,13 @@ public class Board implements EventProducer {
 	 * @return
 	 */
 	public String getTileMap() {
+		var typeToChar = new DualHashBidiMap(tileTypeChars).inverseBidiMap();
 		StringBuffer sb = new StringBuffer();
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
 				Location location = new Location(this, c, r);
 				if(tiles.containsKey(location))
-					sb.append(tileTypeChars.get(tiles.get(location).getType()));
+					sb.append(typeToChar.get(tiles.get(location).getType()));
 				else sb.append(' ');
 			}
 			sb.append('\n');
