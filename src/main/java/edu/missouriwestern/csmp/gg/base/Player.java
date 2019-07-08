@@ -27,7 +27,7 @@ public abstract class Player implements Container, HasProperties, EventListener 
 	}
 
 
-	public Player(String id, String name){
+	public Player(String id){
 		this(id, new HashMap<>());
 	}
 
