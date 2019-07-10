@@ -41,6 +41,8 @@ public abstract class Game implements Container, EventProducer {
 		entityLocations = new HashMap<>();
 	}
 
+	@Override
+	public final Game getGame() { return this; }
 
 	/** UNIX time of the last start or restart */
 	public long getStartTime() {
