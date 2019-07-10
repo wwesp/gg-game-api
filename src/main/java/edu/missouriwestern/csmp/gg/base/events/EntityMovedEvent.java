@@ -2,6 +2,7 @@ package edu.missouriwestern.csmp.gg.base.events;
 
 import edu.missouriwestern.csmp.gg.base.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class EntityMovedEvent extends Event {
@@ -12,9 +13,8 @@ public class EntityMovedEvent extends Event {
     }
 
     public static Map<String,String> createProperies(Entity ent, Container previous) {
-        var m = Map.of(
-                "entity", ""+ent.getID()
-        );
+        var m = new HashMap<String,String>();
+        m.put("entity", ""+ent.getID());
         if(previous instanceof Tile) {
             m.put("row", ""+((Tile)previous).getRow());
             m.put("column", ""+((Tile)previous).getColumn());
