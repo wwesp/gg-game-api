@@ -1,8 +1,8 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.common.collect.HashMultimap;
 import com.google.gson.GsonBuilder;
 import net.sourcedestination.funcles.tuple.Pair;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class Board implements EventProducer {
 	private static Logger logger = Logger.getLogger(EventProducer.class.getCanonicalName());
 
-	private final Map<Location, Tile> tiles;
+	private final Map<Pair<Integer>, Tile> tiles;
 	private final Map<Character,String> tileTypeChars;
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 			// no concurrent set, so only keys used to mimic set
@@ -33,8 +33,8 @@ public class Board implements EventProducer {
 	 */
 	public Board(Map<Character, String> tileTypeChars, Game game, String name, String charMap,
                  Map<Character, Map<String,String>> tileTypeProperties,
-                 Map<Location, Map<String,String>> tileProperties) {
-		var tiles = new HashMap<Location,Tile>();
+                 Map<Pair<Integer>, Map<String,String>> tileProperties) {
+		var tiles = new HashMap<Pair<Integer>,Tile>();
 		int col=0, row=0;
 		for(char c : charMap.toCharArray()) {
 			if(c == '\n') { // reset to next row
@@ -42,7 +42,6 @@ public class Board implements EventProducer {
 				col = 0; // start at first column
 			} else  {  // create a tile in this column
 				if(tileTypeChars.containsKey(c)) {
-					var location = new Location(this, col, row); // location of this tile
                     var properties = new HashMap<String,String>();
 
                     if(tileTypeProperties.containsKey(c))  // if properties for tile type were specified
@@ -50,11 +49,8 @@ public class Board implements EventProducer {
 
                     if(tileProperties.containsKey(Pair.makePair(col, row)))  // if properties for this location were specified
                         properties.putAll(tileProperties.get(Pair.makePair(col, row)));
-                    var tile = new Tile(this,
-							location,
-							tileTypeChars.get(c),
-							properties);
-					tiles.put(location, tile);
+                    var tile = new Tile(this, col, row, tileTypeChars.get(c), properties);
+					tiles.put(Pair.makePair(col, row), tile);
 				}
 				col++; // increment column
 			}
@@ -88,11 +84,10 @@ public class Board implements EventProducer {
 	
 	/**
 	 * Checks if Location exists on board.
-	 * @param loc
 	 * @return
 	 */
-	private boolean locationExists(Location loc){
-		return tiles.containsKey(loc);
+	private boolean locationExists(int column, int row){
+		return tiles.containsKey(Pair.makePair(column, row));
 	}
 
 	/**
@@ -102,22 +97,16 @@ public class Board implements EventProducer {
 	 * @return adjacent Tile
 	 */
 	public Tile getAdjacentTile(Tile tile, Direction direction) {
-		var adjLoc = tile.getLocation().getAdjacentLocation(direction);
-		if (locationExists(adjLoc))
-			return getTile(adjLoc);
-		return null;
-	}
-
-	/**
-	 * Find adjacent Tile given a Location and Direction 
-	 * @param loc location of original tile
-	 * @param direction direction of adjacent tile
-	 * @return adjacent Tile
-	 */
-	public Tile getAdjacentTile(Location loc, Direction direction) {
-		var adjLoc = loc.getAdjacentLocation(direction);
-		if(locationExists(adjLoc))
-			return getTile(adjLoc);
+		var row = tile.getRow();
+		var column = tile.getColumn();
+		switch (direction) {
+			case NORTH: row--; break;
+			case SOUTH: row++; break;
+			case WEST: column--; break;
+			case EAST: column++; break;
+		}
+		if (locationExists(column, row))
+			return getTile(column, row);
 		return null;
 	}
 
@@ -133,11 +122,11 @@ public class Board implements EventProducer {
 	 * @return direction from starting Tile to ending Tile
 	 */
 	public Direction getAdjacentTileDirection(Tile from, Tile to) {
-		if(from.getLocation().getColumn() > to.getLocation().getColumn())
+		if(from.getColumn() > to.getColumn())
 			return Direction.WEST;
-		if(from.getLocation().getColumn() < to.getLocation().getColumn())
+		if(from.getColumn() < to.getColumn())
 			return Direction.EAST;
-		if(from.getLocation().getRow() > to.getLocation().getRow())
+		if(from.getRow() > to.getRow())
 			return Direction.NORTH;
 		return Direction.SOUTH;
 	}
@@ -146,7 +135,7 @@ public class Board implements EventProducer {
 	 * Returns HashMap of {@link Tile}s associated with this Board
 	 * @return HashMap of tiles
 	 */
-	public Map<Location, Tile> getTiles() { return tiles; }
+	public Map<Pair<Integer>, Tile> getTiles() { return tiles; }
 	
 	/**
 	 * Returns stream of {@link Tile}s associated with this Board
@@ -155,14 +144,13 @@ public class Board implements EventProducer {
 	public Stream<Tile> getTileStream() { return tiles.values().stream(); }
 
 	/**
-	 * Returns a {@link Tile} at the given {@link Location}
-	 * @param location location of tile
+	 * Returns a {@link Tile} at the given coordinates
 	 * @return tile at given location
 	 */
-	public Tile getTile(Location location) {
-		if(!tiles.containsKey(location))
+	public Tile getTile(int column, int row) {
+		if(!locationExists(column, row))
 			return null;
-		return tiles.get(location);
+		return tiles.get(Pair.makePair(column, row));
 	}
 
 	/**
@@ -171,9 +159,11 @@ public class Board implements EventProducer {
 	 * @return tile that contains given entity
 	 */
 	public Optional<Tile> getTile(Entity ent){
-		return tiles.values().stream()
-				.filter(t -> t.containsEntity(ent))
-				.findFirst();
+		var container = getGame().getEntityLocation(ent);
+		if(container instanceof Tile) {
+			return Optional.of((Tile)container);
+		}
+		return Optional.empty();
 	}
 
 	public String getName() {
@@ -182,13 +172,13 @@ public class Board implements EventProducer {
 
 	public int getWidth() {
 		return tiles.keySet().stream()
-				.mapToInt(Location::getColumn)
+				.mapToInt(Pair::_1)
 				.max().getAsInt() + 1;
 	}
 
 	public int getHeight() {
 		return tiles.keySet().stream()
-				.mapToInt(Location::getRow)
+				.mapToInt(Pair::_2)
 				.max().getAsInt() + 1;
 	}
 
@@ -198,11 +188,14 @@ public class Board implements EventProducer {
 	 * @return
 	 */
 	public String getTileMap() {
-		var typeToChar = new DualHashBidiMap(tileTypeChars).inverseBidiMap();
+		var typeToChar = HashMultimap.create();
+		for(char c : tileTypeChars.keySet())
+			typeToChar.put(c, tileTypeChars.get(c));
+
 		StringBuffer sb = new StringBuffer();
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
-				Location location = new Location(this, c, r);
+				var location = Pair.makePair(c, r);
 				if(tiles.containsKey(location))
 					sb.append(typeToChar.get(tiles.get(location).getType()));
 				else sb.append(' ');

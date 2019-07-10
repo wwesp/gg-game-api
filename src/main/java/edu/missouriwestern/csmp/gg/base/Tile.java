@@ -3,7 +3,6 @@ package edu.missouriwestern.csmp.gg.base;
 import com.google.gson.GsonBuilder;
 import edu.missouriwestern.csmp.gg.base.events.TileStateUpdateEvent;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,9 +11,9 @@ import java.util.stream.Stream;
 
 /** Represents spaces on the Board */
 public final class Tile implements Container, HasProperties {
-
+	public final int row;
+	public final int column;
 	private final Board board;
-	private final Location location;
 	private final String type;
 	private final HashMap<Integer,Entity> entities = new HashMap<>();
 	private final Map<String,String> properties;
@@ -22,11 +21,11 @@ public final class Tile implements Container, HasProperties {
 	/**
 	 * Constructs a tile from a given {@link Board} at a given {@link Location} with the given character representation
 	 * @param board given Board
-	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location, String type, Map<String,String> properties) {
+	protected Tile(Board board, int column, int row, String type, Map<String,String> properties) {
 		this.board = board;
-		this.location = location;
+		this.row = row;
+		this.column = column;
 		this.type = type;
 		this.properties = new ConcurrentHashMap<>(properties);
 	}
@@ -34,20 +33,21 @@ public final class Tile implements Container, HasProperties {
 	/**
 	 * Constructs a tile from a given {@link Board} at a given {@link Location} with the given character representation
 	 * @param board given Board
-	 * @param location initial Location
 	 * */
-	protected Tile(Board board, Location location, String type) {
-		this(board, location, type, new HashMap<>());
-	}
-	
-	/**
-	 * Returns the {@link Location} of the tile
-	 * @return tile location
-	 */
-	public Location getLocation() {
-		return location;
+	protected Tile(Board board, int column, int row, String type) {
+		this(board, column, row, type, new HashMap<>());
 	}
 
+
+	public int getRow() {
+		return row;
+	}
+	public int getColumn() {
+		return column;
+	}
+
+	@Override
+	public Game getGame() { return board.getGame(); }
 
 	public String getType() { return type; }
 
@@ -129,7 +129,7 @@ public final class Tile implements Container, HasProperties {
 	@Override
 	public void setProperty(String key, String value) {
 		properties.put(key, value);
-		board.accept(new TileStateUpdateEvent(location));
+		board.accept(new TileStateUpdateEvent(this));
 	}
 
 	/** returns a JSON representation of this tile and its properties
@@ -139,8 +139,8 @@ public final class Tile implements Container, HasProperties {
 		var gsonBuilder = new GsonBuilder();
 		var gson = gsonBuilder.create();
 		var m = new HashMap<String,Object>();
-		m.put("row", getLocation().getRow());
-		m.put("column", getLocation().getColumn());
+		m.put("row", getRow());
+		m.put("column", getColumn());
 		m.put("board", getBoard().getName());
 		m.put("type", type);
 		m.put("properties", properties);

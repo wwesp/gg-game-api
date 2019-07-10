@@ -1,22 +1,23 @@
 package edu.missouriwestern.csmp.gg.base.events;
 
+import edu.missouriwestern.csmp.gg.base.Board;
 import edu.missouriwestern.csmp.gg.base.Event;
-import edu.missouriwestern.csmp.gg.base.Location;
+import edu.missouriwestern.csmp.gg.base.Tile;
 
 import java.util.Map;
 
 public class TileStateUpdateEvent extends Event {
-    public TileStateUpdateEvent(Location loc) {
-        super(loc.getBoard().getGame(),
-                loc.getBoard().getGame().getNextEventId(),
-                createProperies(loc));
+    public TileStateUpdateEvent(Tile tile) {
+        super(tile.getBoard().getGame(),
+                tile.getBoard().getGame().getNextEventId(),
+                createProperies(tile.getBoard(), tile.getColumn(), tile.getRow()));
     }
 
-    public static Map<String,String> createProperies(Location loc) {
+    public static Map<String,String> createProperies(Board board, int column, int row) {
         var m = Map.of(
-                "board", loc.getBoard().getName(),
-                "column", ""+loc.getColumn(),
-                "row", ""+loc.getRow()
+                "board", board.getName(),
+                "column", ""+column,
+                "row", ""+row
         );
 
         return m;

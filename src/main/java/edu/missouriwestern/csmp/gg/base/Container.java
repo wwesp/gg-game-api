@@ -5,19 +5,16 @@ import java.util.stream.Stream;
  * Interface for a container that can hold entities.
  */
 public interface Container {
-	
-	/**
-	 * Adds Entity to container.
-	 * @param e Entity to add.
-	 */
-	public void addEntity(Entity e);
+
+	public Game getGame();
 
 	/**
-	 * Gets Entity e from container. 
-	 * @param id  id of entity.
-	 * @return e Entity with associated id
+	 * Adds Entity to container.
+	 * @param ent Entity to add.
 	 */
-	public Entity getEntity(int id);
+	public default void addEntity(Entity ent) {
+		getGame().moveEntity(ent, this);
+	}
 
 	/**
 	 * Removes entity from container.
@@ -26,21 +23,18 @@ public interface Container {
 	 * @param ent Entity to remove.
 	 */
 	public default void removeEntity(Entity ent) {
-		getEntities()
-				.filter(e -> e instanceof Container)
-				.forEach(e -> ((Container)e).removeEntity(e));
+		getGame().moveEntity(ent, getGame());
 	}
 
 	/**
 	 * returns all entities in container.
 	 * @return HashSet of all entities. 
 	 */
-	public Stream<Entity> getEntities();
-	
+	public default Stream<Entity> getEntities() {
+		return getGame().getContainerContents(this);
+	}
 
 	public default boolean containsEntity(Entity ent) {
-		return getEntities()
-				.filter(e -> e == ent)
-				.findFirst().isPresent();
+		return getGame().containsEntity(this, ent);
 	}
 }

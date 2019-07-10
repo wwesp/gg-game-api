@@ -74,14 +74,15 @@ public abstract class Entity implements HasProperties {
 		var gson = gsonBuilder.create();
 		var m = new HashMap<String,Object>();
 		var location = game.getEntityLocation(this);
-		var container = game.getContainingEntity(this);
-		if(location != null) {
-			m.put("board", location.getBoard().getName());
-			m.put("column", location.getColumn());
-			m.put("row", location.getRow());
+		var container = game.getEntityLocation(this);
+		if(location instanceof Tile) {
+			Tile tile = (Tile)container;
+			m.put("board", tile.getBoard().getName());
+			m.put("column", tile.getColumn());
+			m.put("row", tile.getRow());
 			m.put("heading", getHeading());
-		} else if(container != null) {
-			m.put("container", container.getID());
+		} else if(container instanceof Entity) {
+			m.put("container", ((Entity)container).getID());
 		}
 		m.put("id", getID());
 		m.put("type", getType());

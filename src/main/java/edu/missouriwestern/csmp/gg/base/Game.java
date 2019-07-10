@@ -1,8 +1,10 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.common.collect.*;
 import com.google.gson.GsonBuilder;
 import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
 import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
+import net.sourcedestination.funcles.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,14 +21,24 @@ public abstract class Game implements Container, EventProducer {
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
 	private final AtomicInteger nextEventID = new AtomicInteger(1);
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
+
 	// no concurrent set, so only keys used to mimic set
-	private final Map<Integer, Entity> registeredEntities = new ConcurrentHashMap<>();
-	private final Map<Entity, Location> entityLocations = new ConcurrentHashMap<>();
-	private final Map<String, Player> allPlayers = new ConcurrentHashMap<>();
+	private final BiMap<Integer, Entity> registeredEntities;
+	private final BiMap<String, Player> allPlayers;
+
+	// access must be protected by monitor
+	private final Multimap<Container, Entity> containerContents;
+	private final Map<Entity, Container> entityLocations;
+
 
 	public Game() {
 		this.startTime = System.currentTimeMillis();
 		this.elapsedTime = 0;
+		registeredEntities = Maps.synchronizedBiMap(HashBiMap.create());
+		allPlayers = Maps.synchronizedBiMap(HashBiMap.create());
+		// access must be protected by monitor
+		containerContents = HashMultimap.create();
+		entityLocations = new HashMap<>();
 	}
 
 
@@ -132,13 +144,20 @@ public abstract class Game implements Container, EventProducer {
 		return boards.get(name);
 	}
 
+	public void addBoard(String boardId, Board board) {
+		boards.put(boardId, board);
+	}
+
 	/**
 	 * Registers given {@link Entity} with the Game
 	 * @param ent registering Entity
 	 */
 	public void addEntity(Entity ent) {
+		assert ent != null;
+
 		var id = nextEntityID.getAndIncrement();
 		registeredEntities.put(id, ent);
+		moveEntity(ent, this);
 		accept(new EntityCreation(this, getNextEventId(), ent));
 	}
 
@@ -147,52 +166,67 @@ public abstract class Game implements Container, EventProducer {
 	 * @param ent Entity to be removed
 	 */
 	public void removeEntity(Entity ent) {
-
-		// remove entity from all players
-		for (Player p : allPlayers.values()) {//removes entity from players.
-			p.removeEntity(ent);
+		synchronized(this) {
+			var currentContainer = entityLocations.get(ent);
+			entityLocations.remove(ent);
+			if(currentContainer != null) {
+				containerContents.remove(currentContainer, ent);
+			}
+			// remove entity from game
+			registeredEntities.remove(ent);
 		}
 
-		// remove entity from all tiles on all boards
-		for(Board board : boards.values()) {
-			board.getTileStream().forEach(t -> t.removeEntity(ent));
-		}
-
-		// remove entity from any entities that are not on a tile or with a player
-		Container.super.removeEntity(ent);
-
-		// remove entity from game
-		registeredEntities.remove(ent);
+		// alert other game components to entity removal
 		accept(new EntityDeletion(this, getNextEventId(), ent));
 	}
 
-	public void addBoard(String boardId, Board board) {
-		boards.put(boardId, board);
+	public synchronized void moveEntity(Entity ent, Container container) {
+		assert ent != null;
+		assert container != null;
+		assert registeredEntities.containsKey(ent.getID());
+
+		// move entity to new location
+		entityLocations.put(ent, container);
+		containerContents.put(container, ent);
 	}
 
-	/** place an entity at a specified location */
-	public void moveEntity(Entity ent, Location location) {
-		entityLocations.put(ent, location);
+	public synchronized boolean containsEntity(Container container, Entity ent) {
+		assert ent != null;
+		assert container != null;
+		assert registeredEntities.containsKey(ent.getID());
+
+		return containerContents.containsEntry(container, ent);
 	}
 
-	/** locate an entity placed on a tile */
-	public Location getEntityLocation(Entity ent) {
+	/** locate an entity */
+	public synchronized Container getEntityLocation(Entity ent) {
+		assert ent != null;
+		assert registeredEntities.containsKey(ent.getID());
+
 		return entityLocations.get(ent);
 	}
 
-	/** locate an entity contained by another entity */
-	public Entity getContainingEntity(Entity ent) {
-		return getEntities()
-				.filter(e  -> e instanceof Container)
-				.filter(c -> ((Container)c).containsEntity(ent))
-				.findFirst().orElse(null);
+	public synchronized Stream<Entity> getContainerContents(Container container) {
+		assert container != null;
+
+		return new HashSet<Entity>(containerContents.get(container)).stream();
+	}
+
+	/** determine what tile contains an entity.
+	 * Returns null if no tile contains this entity */
+	public synchronized Container getTopLevelEntityLocation(Entity ent) {
+		assert ent != null;
+
+		var location = getEntityLocation(ent);
+		if(location == null) return null;
+		if(location instanceof Entity)
+			return getEntityLocation((Entity)location);
+		return location instanceof Tile ? (Tile)location : null;
 	}
 
 	public int getNextEventId() {
 		return nextEventID.getAndIncrement();
 	}
-
-
 
 	/** returns a JSON representation of this game
 	 */
