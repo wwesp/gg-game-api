@@ -6,6 +6,10 @@ public interface HasProperties {
     public Map<String,String> getProperties();
     public void setProperty(String key, String value);
 
+    public default boolean hasProperty(String key) {
+        return getProperties().containsKey(key);
+    }
+
     public default String getProperty(String key) {
         var m = getProperties();
         if(!m.containsKey(key))

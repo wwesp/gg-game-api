@@ -160,7 +160,10 @@ public abstract class Game implements Container, EventProducer {
 
 		var id = nextEntityID.getAndIncrement();
 		registeredEntities.put(id, ent);
-		moveEntity(ent, this);
+		synchronized (this) { // add entity to the game's contents as default
+			entityLocations.put(ent, this);
+			containerContents.put(this, ent);
+		}
 		accept(new EntityCreation(this, getNextEventId(), ent));
 	}
 
@@ -192,10 +195,14 @@ public abstract class Game implements Container, EventProducer {
 
 		synchronized (this) {
 			// move entity to new location
+			var currentLocation = getEntityLocation(ent);
+			if(currentLocation != null) {
+				entityLocations.remove(ent);
+				containerContents.remove(currentLocation, ent);
+			}
 			entityLocations.put(ent, container);
 			containerContents.put(container, ent);
 		}
-
 		accept(new EntityMovedEvent(ent, prev));
 	}
 
