@@ -1,6 +1,8 @@
 package edu.missouriwestern.csmp.gg.base;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimaps;
 import com.google.gson.GsonBuilder;
 import net.sourcedestination.funcles.tuple.Pair;
 
@@ -14,7 +16,7 @@ public class Board implements EventProducer {
 	private static Logger logger = Logger.getLogger(EventProducer.class.getCanonicalName());
 
 	private final Map<Pair<Integer>, Tile> tiles;
-	private final Map<Character,String> tileTypeChars;
+	private final BiMap<Character,String> tileTypeChars;
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
 			// no concurrent set, so only keys used to mimic set
 	private final String name;
@@ -57,7 +59,7 @@ public class Board implements EventProducer {
 		}
 		this.game = game;
 		this.name = name;
-		this.tileTypeChars = Collections.unmodifiableMap(tileTypeChars);
+		this.tileTypeChars = HashBiMap.create(tileTypeChars);
 		this.tiles = Collections.unmodifiableMap(tiles);
 	}
 
@@ -188,16 +190,13 @@ public class Board implements EventProducer {
 	 * @return
 	 */
 	public String getTileMap() {
-		var typeToChar = HashMultimap.create();
-		for(char c : tileTypeChars.keySet())
-			typeToChar.put(c, tileTypeChars.get(c));
 
 		StringBuffer sb = new StringBuffer();
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
 				var location = Pair.makePair(c, r);
 				if(tiles.containsKey(location))
-					sb.append(typeToChar.get(tiles.get(location).getType()));
+					sb.append(tileTypeChars.inverse().get(tiles.get(location).getType()));
 				else sb.append(' ');
 			}
 			sb.append('\n');
