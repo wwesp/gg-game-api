@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import com.google.gson.GsonBuilder;
 import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
 import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
+import edu.missouriwestern.csmp.gg.base.events.EntityMovedEvent;
 import net.sourcedestination.funcles.tuple.Pair;
 
 import java.util.*;
@@ -182,14 +183,20 @@ public abstract class Game implements Container, EventProducer {
 		accept(new EntityDeletion(this, getNextEventId(), ent));
 	}
 
-	public synchronized void moveEntity(Entity ent, Container container) {
+	public void moveEntity(Entity ent, Container container) {
 		assert ent != null;
 		assert container != null;
 		assert registeredEntities.containsKey(ent.getID());
 
-		// move entity to new location
-		entityLocations.put(ent, container);
-		containerContents.put(container, ent);
+		Container prev = getGame().getEntityLocation(ent);
+
+		synchronized (this) {
+			// move entity to new location
+			entityLocations.put(ent, container);
+			containerContents.put(container, ent);
+		}
+
+		accept(new EntityMovedEvent(ent, prev));
 	}
 
 	public synchronized boolean containsEntity(Container container, Entity ent) {

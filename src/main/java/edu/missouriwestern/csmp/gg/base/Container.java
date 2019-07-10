@@ -34,6 +34,8 @@ public interface Container {
 		return getGame().getContainerContents(this);
 	}
 
+	public default boolean isEmpty() { return !getEntities().findAny().isPresent(); }
+
 	public default boolean containsEntity(Entity ent) {
 		return getGame().containsEntity(this, ent);
 	}
