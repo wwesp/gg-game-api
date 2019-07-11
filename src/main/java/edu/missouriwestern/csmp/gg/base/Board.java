@@ -2,7 +2,6 @@ package edu.missouriwestern.csmp.gg.base;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Multimaps;
 import com.google.gson.GsonBuilder;
 import net.sourcedestination.funcles.tuple.Pair;
 
@@ -49,8 +48,9 @@ public class Board implements EventProducer {
                     if(tileTypeProperties.containsKey(c))  // if properties for tile type were specified
                         properties.putAll(tileTypeProperties.get(c));
 
-                    if(tileProperties.containsKey(Pair.makePair(col, row)))  // if properties for this location were specified
-                        properties.putAll(tileProperties.get(Pair.makePair(col, row)));
+                    // spring XML makes pairs of strings instead of pairs of integers, so strings are used below
+                    if(tileProperties.containsKey(Pair.makePair(""+col, ""+row)))  // if properties for this location were specified
+                        properties.putAll(tileProperties.get(Pair.makePair(""+col, ""+row)));
                     if(!properties.containsKey("character"))
                     	properties.put("character", ""+c);
                     var tile = new Tile(this, col, row, tileTypeChars.get(c), properties);
