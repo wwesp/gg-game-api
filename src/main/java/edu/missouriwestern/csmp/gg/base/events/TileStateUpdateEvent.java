@@ -9,7 +9,6 @@ import java.util.Map;
 public class TileStateUpdateEvent extends Event {
     public TileStateUpdateEvent(Tile tile) {
         super(tile.getBoard().getGame(),
-                tile.getBoard().getGame().getNextEventId(),
                 createProperies(tile.getBoard(), tile.getColumn(), tile.getRow()));
     }
 

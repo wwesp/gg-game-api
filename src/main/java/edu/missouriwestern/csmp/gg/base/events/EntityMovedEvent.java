@@ -8,7 +8,6 @@ import java.util.Map;
 public class EntityMovedEvent extends Event {
     public EntityMovedEvent(Entity ent, Container previous) {
         super(ent.getGame(),
-                ent.getGame().getNextEventId(),
                 createProperies(ent, previous));
     }
 

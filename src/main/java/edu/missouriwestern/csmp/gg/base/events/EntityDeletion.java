@@ -7,8 +7,8 @@ import edu.missouriwestern.csmp.gg.base.Game;
 import java.util.Map;
 
 public class EntityDeletion extends Event {
-    public EntityDeletion(Game game, int id, Entity ent) {
-        super(game, id, createProperies(ent));
+    public EntityDeletion(Game game, Entity ent) {
+        super(game, createProperies(ent));
     }
 
     public static Map<String,String> createProperies(Entity ent) {

@@ -188,7 +188,7 @@ public abstract class Game implements Container, EventProducer {
 		}
 
 		// alert other game components to entity removal
-		accept(new EntityDeletion(this, getNextEventId(), ent));
+		accept(new EntityDeletion(this, ent));
 	}
 
 	public void moveEntity(Entity ent, Container container) {
@@ -245,7 +245,7 @@ public abstract class Game implements Container, EventProducer {
 		return location instanceof Tile ? (Tile)location : null;
 	}
 
-	public int getNextEventId() {
+	protected int getNextEventId() {
 		return nextEventID.getAndIncrement();
 	}
 

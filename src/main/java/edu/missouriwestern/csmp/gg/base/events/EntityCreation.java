@@ -10,6 +10,9 @@ public class EntityCreation extends Event {
     public EntityCreation(Game game, int id, Entity ent) {
         super(game, id, createProperies(ent));
     }
+    public EntityCreation(Game game, Entity ent) {
+        super(game, createProperies(ent));
+    }
 
     public static Map<String,String> createProperies(Entity ent) {
         var m = Map.of(
