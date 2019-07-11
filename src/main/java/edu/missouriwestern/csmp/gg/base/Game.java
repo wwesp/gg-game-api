@@ -81,7 +81,10 @@ public abstract class Game implements Container, EventProducer {
 	 * @param player player to be removed from the game
 	 */
 	public void removePlayer(Player player) {
-		allPlayers.remove(player);
+		allPlayers.remove(player.getID());
+	}
+	public void removePlayer(String playerId) {
+		allPlayers.remove(playerId);
 	}
 
 	/** find player with associated ID that has joined this game

@@ -6,7 +6,6 @@ import edu.missouriwestern.csmp.gg.base.events.CommandEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /** represents a player within the game
  * not an entity as a player may potentially comprise multiple entities within the game
