@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** a class representing tile-occupying entities in the game */
 public abstract class Entity implements HasProperties {
@@ -21,7 +22,7 @@ public abstract class Entity implements HasProperties {
 		this.game = game;
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
-		this.properties = properties;
+		this.properties = new ConcurrentHashMap<>(properties);
 	}
 
 	@Override

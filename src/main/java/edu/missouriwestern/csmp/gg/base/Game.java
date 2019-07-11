@@ -2,8 +2,8 @@ package edu.missouriwestern.csmp.gg.base;
 
 import com.google.common.collect.*;
 import com.google.gson.GsonBuilder;
-import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
-import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
+import edu.missouriwestern.csmp.gg.base.events.EntityCreationEvent;
+import edu.missouriwestern.csmp.gg.base.events.EntityDeletionEvent;
 import edu.missouriwestern.csmp.gg.base.events.EntityMovedEvent;
 
 import java.util.*;
@@ -166,7 +166,7 @@ public abstract class Game implements Container, EventProducer {
 		if(ent instanceof EventListener) {
 			registerListener((EventListener)ent);
 		}
-		accept(new EntityCreation(this, getNextEventId(), ent));
+		accept(new EntityCreationEvent(this, ent));
 	}
 
 	/**
@@ -178,6 +178,8 @@ public abstract class Game implements Container, EventProducer {
 			if(ent instanceof EventListener) {
 				deregisterListener((EventListener)ent);
 			}
+			moveEntity(ent, this); // generate an entity moved event
+
 			var currentContainer = entityLocations.get(ent);
 			entityLocations.remove(ent);
 			if(currentContainer != null) {
@@ -188,7 +190,7 @@ public abstract class Game implements Container, EventProducer {
 		}
 
 		// alert other game components to entity removal
-		accept(new EntityDeletion(this, ent));
+		accept(new EntityDeletionEvent(this, ent));
 	}
 
 	public void moveEntity(Entity ent, Container container) {

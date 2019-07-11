@@ -7,10 +7,16 @@ import edu.missouriwestern.csmp.gg.base.Tile;
 import java.util.Map;
 
 public class TileStateUpdateEvent extends Event {
+
+    private final Tile tile;
+
     public TileStateUpdateEvent(Tile tile) {
         super(tile.getBoard().getGame(),
                 createProperies(tile.getBoard(), tile.getColumn(), tile.getRow()));
+        this.tile = tile;
     }
+
+    public Tile getTile() { return tile; }
 
     public static Map<String,String> createProperies(Board board, int column, int row) {
         var m = Map.of(

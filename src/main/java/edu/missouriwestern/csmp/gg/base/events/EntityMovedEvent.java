@@ -6,10 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EntityMovedEvent extends Event {
+
+    private final Entity entity;
+    private final Container previousContainer;
+
     public EntityMovedEvent(Entity ent, Container previous) {
         super(ent.getGame(),
                 createProperies(ent, previous));
+        this.entity = ent;
+        this.previousContainer = previous;
     }
+
+    public Entity getEntity() { return entity; }
+    public Container getPreviousContainer() { return previousContainer; }
 
     public static Map<String,String> createProperies(Entity ent, Container previous) {
         var m = new HashMap<String,String>();

@@ -6,13 +6,16 @@ import edu.missouriwestern.csmp.gg.base.Game;
 
 import java.util.Map;
 
-public class EntityCreation extends Event {
-    public EntityCreation(Game game, int id, Entity ent) {
-        super(game, id, createProperies(ent));
-    }
-    public EntityCreation(Game game, Entity ent) {
+public class EntityDeletionEvent extends Event {
+
+    private Entity entity;
+
+    public EntityDeletionEvent(Game game, Entity ent) {
         super(game, createProperies(ent));
+        this.entity = ent;
     }
+
+    public Entity getEntity() { return entity; }
 
     public static Map<String,String> createProperies(Entity ent) {
         var m = Map.of(
