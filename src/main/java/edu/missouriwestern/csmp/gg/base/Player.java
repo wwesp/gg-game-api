@@ -24,6 +24,7 @@ public abstract class Player implements Container, HasProperties, EventListener 
 		this.id = id;
 		this.game = game;
 		this.properties = new HashMap<>(properties);
+		game.addPlayer(this);
 		game.registerListener(this);
 	}
 

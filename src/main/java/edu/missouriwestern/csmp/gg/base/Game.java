@@ -89,7 +89,7 @@ public abstract class Game implements Container, EventProducer {
 	 * @param id ID of player to be found
 	 * @return player object with associated ID
 	 */
-	public Player getPlayer(int id) {
+	public Player getPlayer(String id) {
 		return allPlayers.get(id);
 	}
 
