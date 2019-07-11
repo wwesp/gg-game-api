@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import edu.missouriwestern.csmp.gg.base.events.EntityCreation;
 import edu.missouriwestern.csmp.gg.base.events.EntityDeletion;
 import edu.missouriwestern.csmp.gg.base.events.EntityMovedEvent;
-import net.sourcedestination.funcles.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -164,6 +163,9 @@ public abstract class Game implements Container, EventProducer {
 			entityLocations.put(ent, this);
 			containerContents.put(this, ent);
 		}
+		if(ent instanceof EventListener) {
+			registerListener((EventListener)ent);
+		}
 		accept(new EntityCreation(this, getNextEventId(), ent));
 	}
 
@@ -173,6 +175,9 @@ public abstract class Game implements Container, EventProducer {
 	 */
 	public void removeEntity(Entity ent) {
 		synchronized(this) {
+			if(ent instanceof EventListener) {
+				deregisterListener((EventListener)ent);
+			}
 			var currentContainer = entityLocations.get(ent);
 			entityLocations.remove(ent);
 			if(currentContainer != null) {

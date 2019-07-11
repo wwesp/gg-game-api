@@ -1,10 +1,12 @@
 package edu.missouriwestern.csmp.gg.base;
 
 import com.google.gson.GsonBuilder;
+import edu.missouriwestern.csmp.gg.base.events.CommandEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** represents a player within the game
  * not an entity as a player may potentially comprise multiple entities within the game
@@ -22,10 +24,15 @@ public abstract class Player implements Container, HasProperties, EventListener 
 		this.id = id;
 		this.game = game;
 		this.properties = new HashMap<>(properties);
+		game.registerListener(this);
 	}
 
 	public Player(String id, Game game){
 		this(id, game, new HashMap<>());
+	}
+
+	public void issueCommand(String commandName, String parameter) {
+		game.accept(new CommandEvent(game, game.getNextEventId(), getID(), commandName, parameter));
 	}
 
 	@Override
