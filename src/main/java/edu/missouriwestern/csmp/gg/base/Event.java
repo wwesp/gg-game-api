@@ -35,6 +35,8 @@ public class Event implements HasProperties {
         this.id = id;
         this.game = game;
         this.eventTime = game.getGameTime();
+        properties = new HashMap<>(properties); // add id to properties
+        properties.put("id", ""+id);
         this.properties = Collections.unmodifiableMap(properties);
     }
 

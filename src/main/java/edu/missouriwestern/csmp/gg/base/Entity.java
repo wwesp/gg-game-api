@@ -27,6 +27,8 @@ public abstract class Entity implements HasProperties {
 
 	@Override
 	public Map<String,String> getProperties() {
+		var properties = new HashMap<>(this.properties); // add id to properties
+		properties.put("id", ""+id);
 		return Collections.unmodifiableMap(properties);
 	}
 
