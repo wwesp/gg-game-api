@@ -5,6 +5,7 @@ import edu.missouriwestern.csmp.gg.base.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Issued whenever an {@link Entity} moves from one container to another */
 public class EntityMovedEvent extends Event {
 
     private final Entity entity;

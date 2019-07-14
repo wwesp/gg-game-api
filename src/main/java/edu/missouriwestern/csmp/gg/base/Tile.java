@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 
-/** Represents spaces on the Board */
+// TODO: allow / encourage Tile subclasses to help simplify xml config and add a good spot for event listeners
+/** Represents spaces on the {@link Board} that contain entities */
 public final class Tile implements Container, HasProperties {
 	public final int row;
 	public final int column;
@@ -38,9 +39,12 @@ public final class Tile implements Container, HasProperties {
 	}
 
 
+	/** row placement of the tile on the board */
 	public int getRow() {
 		return row;
 	}
+
+	/** column placement of the tile on the board */
 	public int getColumn() {
 		return column;
 	}
@@ -48,6 +52,7 @@ public final class Tile implements Container, HasProperties {
 	@Override
 	public Game getGame() { return board.getGame(); }
 
+	@Deprecated // use Tile class names for types
 	public String getType() { return type; }
 
 	/**

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-/** Class for managing the state of subgames using the 2D API
+/** Class for managing the state of games using the 2D API
  */
 public abstract class Game implements Container, EventProducer {
 
@@ -54,16 +54,22 @@ public abstract class Game implements Container, EventProducer {
 		return System.currentTimeMillis() - startTime + elapsedTime;
 	}
 
+	/** begins forwarding all game events to specified listener */
 	@Override
 	public void registerListener(EventListener listener) {
 		listeners.put(listener, "thing");
 	}
 
+	/** stops forwarding all game events to specified listener */
 	@Override
 	public void deregisterListener(EventListener listener) {
 		listeners.put(listener, "thing");
 	}
 
+	/** returns currently registered event listeners
+	 * All listeners registered via registerListener
+	 * @return
+	 */
 	@Override
 	public Stream<EventListener> getListeners() {
 		return listeners.keySet().stream();
@@ -155,6 +161,7 @@ public abstract class Game implements Container, EventProducer {
 
 	/**
 	 * Registers given {@link Entity} with the Game
+	 * If the entity is an event listener, it is also registered as such.
 	 * @param ent registering Entity
 	 */
 	public void addEntity(Entity ent) {
@@ -196,6 +203,11 @@ public abstract class Game implements Container, EventProducer {
 		accept(new EntityDeletionEvent(this, ent));
 	}
 
+	/** moves the entity to a new Container.
+	 * Container may be a Player, a Tile, or another Entity
+	 * @param ent
+	 * @param container
+	 */
 	public void moveEntity(Entity ent, Container container) {
 		assert ent != null;
 		assert container != null;
@@ -216,6 +228,7 @@ public abstract class Game implements Container, EventProducer {
 		accept(new EntityMovedEvent(ent, prev));
 	}
 
+	/** Determines whether or not a specified Container holds the specified entity */
 	public synchronized boolean containsEntity(Container container, Entity ent) {
 		assert ent != null;
 		assert container != null;
@@ -224,7 +237,8 @@ public abstract class Game implements Container, EventProducer {
 		return containerContents.containsEntry(container, ent);
 	}
 
-	/** locate an entity */
+	/** locates the Container holding an Entity.
+	 * Every Entity is held by exactly one container (possibly the Game itself if no other) */
 	public synchronized Container getEntityLocation(Entity ent) {
 		assert ent != null;
 		assert registeredEntities.containsKey(ent.getID());
@@ -232,13 +246,16 @@ public abstract class Game implements Container, EventProducer {
 		return entityLocations.get(ent);
 	}
 
+	/** returns all entities contained by the specified container */
 	public synchronized Stream<Entity> getContainerContents(Container container) {
 		assert container != null;
 
 		return new HashSet<Entity>(containerContents.get(container)).stream();
 	}
 
-	/** determine what tile contains an entity.
+	/** determine what non-entity contains an entity.
+	 * For instance, if an entity is held by a treasure chest and the treasure chest appears on a tile,
+	 * the tile holding the treasure chest is returned.
 	 * Returns null if no tile contains this entity */
 	public synchronized Container getTopLevelEntityLocation(Entity ent) {
 		assert ent != null;
@@ -250,6 +267,7 @@ public abstract class Game implements Container, EventProducer {
 		return location instanceof Tile ? (Tile)location : null;
 	}
 
+	/** determines next ID to be used for an event, then increments the count of events */
 	protected int getNextEventId() {
 		return nextEventID.getAndIncrement();
 	}

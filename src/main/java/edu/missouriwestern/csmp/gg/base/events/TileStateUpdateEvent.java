@@ -6,6 +6,9 @@ import edu.missouriwestern.csmp.gg.base.Tile;
 
 import java.util.Map;
 
+/** Event is triggered when an attribute of a tile changes.
+ * Event is not triggered when an entity enters or leaves a tile
+ */
 public class TileStateUpdateEvent extends Event {
 
     private final Tile tile;
@@ -16,6 +19,7 @@ public class TileStateUpdateEvent extends Event {
         this.tile = tile;
     }
 
+    /** returns the {@link Tile} whose status was updated */
     public Tile getTile() { return tile; }
 
     public static Map<String,String> createProperies(Board board, int column, int row) {

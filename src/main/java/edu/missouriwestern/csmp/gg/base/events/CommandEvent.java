@@ -6,13 +6,23 @@ import edu.missouriwestern.csmp.gg.base.Game;
 
 import java.util.Map;
 
+/** represents a command sent by a player of the game */
 public class CommandEvent extends Event {
-    public CommandEvent(Game game, int id, String playerId, String commandName, String parameter) {
-        super(game, id, createProperies(playerId, commandName, parameter));
-    }
+
+    private String commandName;
+    private String parameterValue;
+    private String playerId;
+
     public CommandEvent(Game game, String playerId, String commandName, String parameter) {
         super(game, createProperies(playerId, commandName, parameter));
+        this.commandName = commandName;
+        this.parameterValue = parameter;
+        this.playerId = playerId;
     }
+
+    public String getCommandName() { return commandName; }
+    public String getParameterValue() { return parameterValue; }
+    public String getPlayerId() { return playerId; }
 
     public static Map<String,String> createProperies(String playerId, String commandName, String parameter) {
         var m = Map.of(

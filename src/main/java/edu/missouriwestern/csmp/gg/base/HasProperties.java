@@ -2,6 +2,7 @@ package edu.missouriwestern.csmp.gg.base;
 
 import java.util.Map;
 
+/** interface for all game objects that can have properties associated with them */
 public interface HasProperties {
     public Map<String,String> getProperties();
     public void setProperty(String key, String value);
@@ -18,6 +19,8 @@ public interface HasProperties {
         return m.get(key);
     }
 
+    /** Creates a JSON representation of the properties */
+    // TODO: use GSON library
     public default String serializeProperties() {
         return "{" + getProperties().entrySet().stream()
                 .map(e -> "\"" + e.getKey() + "\": " + e.getValue())

@@ -4,6 +4,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+
+// TODO: create annotation indicating required and optional properties
+
+/** Indicates when something happens during the game that other game components may react to.
+ * Also used to record important events in the processing of the game.
+ */
 public class Event implements HasProperties {
 
     private final Map<String,String> properties;
@@ -15,6 +21,7 @@ public class Event implements HasProperties {
         this(game, game.getNextEventId(), new HashMap<>());
     }
 
+    // TODO: eliminate this
     public Event(Game game, int id) {
         this(game, id, new HashMap<>());
     }
@@ -23,6 +30,7 @@ public class Event implements HasProperties {
         this(game, game.getNextEventId(), properties);
     }
 
+    // TODO: get rid of id param
     public Event(Game game, int id, Map<String,String> properties) {
         this.id = id;
         this.game = game;
@@ -40,6 +48,7 @@ public class Event implements HasProperties {
         throw new UnsupportedOperationException("Event properties are immutable");
     }
 
+    /** time elapsed since start of game when this event occurred */
     public long getEventTime() {
         return eventTime;
     }

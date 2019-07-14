@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /** represents a player within the game
- * not an entity as a player may potentially comprise multiple entities within the game
+ * not an {@link Entity} as a player may potentially comprise multiple entities within the game.
+ * Intended to house client connection code.
  *
  * Instanciating classes must include implementation of accept(Event) and forward
  * serialized events to clients.
@@ -31,6 +32,7 @@ public abstract class Player implements Container, HasProperties, EventListener 
 		this(id, game, new HashMap<>());
 	}
 
+	/** Isues a new {@link CommandEvent} to all {@link EventListener}'s in the game. */
 	public void issueCommand(String commandName, String parameter) {
 		game.accept(new CommandEvent(game, game.getNextEventId(), getID(), commandName, parameter));
 	}

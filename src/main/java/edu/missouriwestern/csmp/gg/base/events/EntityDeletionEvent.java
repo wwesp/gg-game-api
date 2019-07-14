@@ -6,6 +6,7 @@ import edu.missouriwestern.csmp.gg.base.Game;
 
 import java.util.Map;
 
+/** Issued whenever an {@link Entity} is removed from the game */
 public class EntityDeletionEvent extends Event {
 
     private Entity entity;

@@ -6,6 +6,7 @@ import edu.missouriwestern.csmp.gg.base.Game;
 
 import java.util.Map;
 
+/** Issued whenever a new Entity is added to the game */
 public class EntityCreationEvent extends Event {
 
     private Entity entity;
