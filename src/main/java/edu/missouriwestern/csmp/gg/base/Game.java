@@ -21,17 +21,20 @@ public abstract class Game implements Container, EventProducer {
 	private final AtomicInteger nextEntityID = new AtomicInteger(1);
 	private final AtomicInteger nextEventID = new AtomicInteger(1);
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
+	private Object dataStore;
 
 	// no concurrent set, so only keys used to mimic set
-	private final BiMap<Integer, Entity> registeredEntities;
+	final BiMap<Integer, Entity> registeredEntities;
 	private final BiMap<String, Player> allPlayers;
 
 	// access must be protected by monitor
 	private final Multimap<Container, Entity> containerContents;
 	private final Map<Entity, Container> entityLocations;
 
-
-	public Game() {
+	public Game(Object dataStore) {
+		if (dataStore instanceof DataStore){
+			this.dataStore = dataStore;
+		}
 		this.startTime = System.currentTimeMillis();
 		this.elapsedTime = 0;
 		registeredEntities = Maps.synchronizedBiMap(HashBiMap.create());
@@ -52,6 +55,10 @@ public abstract class Game implements Container, EventProducer {
 	/** returns the number of milliseconds elapsed since the start of the game */
 	public long getGameTime() {
 		return System.currentTimeMillis() - startTime + elapsedTime;
+	}
+
+	public DataStore getDataStore(){
+		return (DataStore) dataStore;
 	}
 
 	/** begins forwarding all game events to specified listener */
@@ -80,6 +87,7 @@ public abstract class Game implements Container, EventProducer {
 	 */
 	public void addPlayer(Player player) {
 		allPlayers.put(player.getID(), player);
+		getDataStore().load(player);
 	}
 
 	/** remove player from the game
