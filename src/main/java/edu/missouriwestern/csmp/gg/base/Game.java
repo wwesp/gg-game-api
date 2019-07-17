@@ -53,7 +53,8 @@ public abstract class Game implements Container, EventProducer {
 		// access must be protected by monitor
 		containerContents = HashMultimap.create();
 		entityLocations = new HashMap<>();
-		this.nextEntityID = new AtomicInteger(dataStore.getMaxEntityId());
+		  // set next entity ID to be one more than the biggest one in the database
+		this.nextEntityID = new AtomicInteger(dataStore.getMaxEntityId() + 1);
 	}
 
 	@Override
@@ -186,7 +187,7 @@ public abstract class Game implements Container, EventProducer {
 	 */
 	public void addEntity(Entity ent) {
 		assert ent != null;
-		var id = - 1; // temporary id
+		var id = -1; // temporary id, -1 means entity was not found in db
 		if(dataStore != null && ent.getClass().isAnnotationPresent(Permanent.class)) {
 			// this entity should be loaded from the database if possible
 			var ids = dataStore.search(ent.getProperties());
