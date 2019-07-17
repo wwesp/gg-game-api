@@ -6,6 +6,7 @@ import edu.missouriwestern.csmp.gg.base.events.EntityCreationEvent;
 import edu.missouriwestern.csmp.gg.base.events.EntityDeletionEvent;
 import edu.missouriwestern.csmp.gg.base.events.EntityMovedEvent;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,10 +19,10 @@ public abstract class Game implements Container, EventProducer {
 	private final Map<String,Board> boards = new ConcurrentHashMap<>();
 	private final long startTime;    // time when game was started or restarted
 	private final long elapsedTime;  // time elapsed in game since start or last restart
-	private final AtomicInteger nextEntityID = new AtomicInteger(1);
+	private final AtomicInteger nextEntityID;
 	private final AtomicInteger nextEventID = new AtomicInteger(1);
 	private final Map<EventListener,Object> listeners = new ConcurrentHashMap<>();
-	private Object dataStore;
+	private final DataStore dataStore;
 
 	// no concurrent set, so only keys used to mimic set
 	final BiMap<Integer, Entity> registeredEntities;
@@ -31,10 +32,8 @@ public abstract class Game implements Container, EventProducer {
 	private final Multimap<Container, Entity> containerContents;
 	private final Map<Entity, Container> entityLocations;
 
-	public Game(Object dataStore) {
-		if (dataStore instanceof DataStore){
-			this.dataStore = dataStore;
-		}
+	public Game() {
+		this.dataStore = null; // data store won't be used with this game
 		this.startTime = System.currentTimeMillis();
 		this.elapsedTime = 0;
 		registeredEntities = Maps.synchronizedBiMap(HashBiMap.create());
@@ -42,6 +41,19 @@ public abstract class Game implements Container, EventProducer {
 		// access must be protected by monitor
 		containerContents = HashMultimap.create();
 		entityLocations = new HashMap<>();
+		this.nextEntityID = new AtomicInteger(0);
+	}
+
+	public Game(DataStore dataStore) {
+		this.dataStore = dataStore;
+		this.startTime = System.currentTimeMillis();
+		this.elapsedTime = 0;
+		registeredEntities = Maps.synchronizedBiMap(HashBiMap.create());
+		allPlayers = Maps.synchronizedBiMap(HashBiMap.create());
+		// access must be protected by monitor
+		containerContents = HashMultimap.create();
+		entityLocations = new HashMap<>();
+		this.nextEntityID = new AtomicInteger(dataStore.getMaxEntityId());
 	}
 
 	@Override
@@ -174,8 +186,20 @@ public abstract class Game implements Container, EventProducer {
 	 */
 	public void addEntity(Entity ent) {
 		assert ent != null;
-
-		var id = nextEntityID.getAndIncrement();
+		var id = - 1; // temporary id
+		if(dataStore != null && ent.getClass().isAnnotationPresent(Permanent.class)) {
+			// this entity should be loaded from the database if possible
+			var ids = dataStore.search(ent.getProperties());
+			if(ids.size() == 1) {  // found a unique entity in the db
+				id = ids.get(0);   // assign its id
+				ent.setProperty("id", ""+id);  // set the id as a property to look up other properties
+				dataStore.load(ent);  // load other properties from the database
+			}
+		}
+		if(id == -1) {
+			// could not load id from database
+			id = nextEntityID.getAndIncrement();
+		}
 		registeredEntities.put(id, ent);
 		synchronized (this) { // add entity to the game's contents as default
 			entityLocations.put(ent, this);
