@@ -5,6 +5,7 @@ import edu.missouriwestern.csmp.gg.base.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Issued whenever an {@link Entity} moves from one container to another */
 public class EntityMovedEvent extends Event {
 
     private final Entity entity;
@@ -24,6 +25,7 @@ public class EntityMovedEvent extends Event {
         var m = new HashMap<String,String>();
         m.put("entity", ""+ent.getID());
         if(previous instanceof Tile) {
+            m.put("board", ""+((Tile)previous).getBoard().getName());
             m.put("row", ""+((Tile)previous).getRow());
             m.put("column", ""+((Tile)previous).getColumn());
         } else if(previous instanceof Entity) {

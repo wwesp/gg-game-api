@@ -10,7 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-/** represents the playing board */
+/** represents a 2d grid of tiles used as a playing surface for a game
+ *  */
 public class Board implements EventProducer {
 	private static Logger logger = Logger.getLogger(EventProducer.class.getCanonicalName());
 
@@ -32,6 +33,7 @@ public class Board implements EventProducer {
 	 * @param charMap
 	 * @param tileProperties
 	 */
+	// TODO: re-introduce tile generators when tiles are updated to have subclasses
 	public Board(Map<Character, String> tileTypeChars, Game game, String name, String charMap,
                  Map<Character, Map<String,String>> tileTypeProperties,
                  Map<Pair<Integer>, Map<String,String>> tileProperties) {

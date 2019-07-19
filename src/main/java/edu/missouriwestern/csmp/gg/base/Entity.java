@@ -18,15 +18,22 @@ public abstract class Entity implements HasProperties {
 	 * Constructs Entity from a {@link Game}
 	 * @param game associated Game
 	 */
-	protected Entity(Game game, Map<String,String> properties) {
+	public Entity(Game game, Map<String,String> properties) {
 		this.game = game;
 		game.addEntity(this);
 		this.id = game.getEntityId(this);
 		this.properties = new ConcurrentHashMap<>(properties);
 	}
 
+	public Entity(Game game, Map<String,String> properties, Container initialLocation) {
+		this(game,properties);
+		game.moveEntity(this, initialLocation);
+	}
+
 	@Override
 	public Map<String,String> getProperties() {
+		var properties = new HashMap<>(this.properties); // add id to properties
+		properties.put("id", ""+id);
 		return Collections.unmodifiableMap(properties);
 	}
 
