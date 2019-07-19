@@ -1,5 +1,7 @@
 package edu.missouriwestern.csmp.gg.base;
 
+import com.google.gson.GsonBuilder;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,10 +51,13 @@ public class Event implements HasProperties {
     }
 
     public String toString() {
-        return "{ \"id\": " + id +
-                ", \"type\": " + getClass().getSimpleName() +
-                ", \"properties\": " + this.serializeProperties() +
-        "}";
-
+            var gsonBuilder = new GsonBuilder();
+            var gson = gsonBuilder.create();
+            var m = new HashMap<String,Object>();
+            m.put("id", id);
+            m.put("time", getEventTime());
+            m.put("type", getClass().getSimpleName());
+            m.put("properties", getProperties());
+            return gson.toJson(m);
     }
 }
