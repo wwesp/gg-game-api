@@ -20,9 +20,9 @@ public abstract class Entity implements HasProperties {
 	 */
 	public Entity(Game game, Map<String,String> properties) {
 		this.game = game;
-		game.addEntity(this);
 		this.id = game.getEntityId(this);
 		this.properties = new ConcurrentHashMap<>(properties);
+		game.addEntity(this);
 	}
 
 	public Entity(Game game, Map<String,String> properties, Container initialLocation) {
